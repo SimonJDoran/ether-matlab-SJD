@@ -1,0 +1,67 @@
+classdef AbstractGuiApplication < ether.app.AbstractApplication
+	%ABSTRACTGUIAPPLICATION Summary of this class goes here
+	%   Detailed explanation goes here
+
+	properties(SetAccess=private)
+		frame;
+		mouseListeners = {};
+	end
+
+	methods
+		%-------------------------------------------------------------------------
+		function run(this)
+			run@ether.app.AbstractApplication(this);
+			function onKill(~, ~)
+				delete(this.frame);
+				this.exit;
+			end
+			this.frame = figure(...
+				'MenuBar', 'none', ...
+				'Name', this.productName, ...
+				'NumberTitle', 'off', ...
+				'CloseRequestFcn', @onKill, ...
+				'WindowButtonMotionFcn', @this.onMouseMoved);
+			this.initComponents();
+		end
+
+	end
+
+	methods(Sealed)
+		%-------------------------------------------------------------------------
+		function added = addMouseListener(this, listeners)
+			added = [];
+			for ii=1:numel(listeners)
+				listener = listeners(ii);
+				if ~isa(listener, 'ether.ui.MouseListener')
+					continue;
+				end
+				if any(this.mouseListeners == listener)
+					continue;
+				end
+				this.mouseListeners = [this.mouseListeners, {listener}];
+				added = [added;listener];
+			end
+		end
+		
+	end
+
+	methods(Abstract,Access=protected)
+		%-------------------------------------------------------------------------
+		initComponents(this);
+
+		%-------------------------------------------------------------------------
+		onEvent(this, source, event);
+
+		%-------------------------------------------------------------------------
+		onMenuEvent(this, source, event);
+	end
+
+	methods(Access=private)
+		%-------------------------------------------------------------------------
+		function onMouseMoved(this, source, event)
+			cellfun(@(listener) listener.mouseMoved, this.mouseListeners);
+		end
+		
+	end
+end
+
