@@ -2,7 +2,7 @@ classdef DicomImageVolume < ether.process.ImageVolume & ether.process.Loadable
 	%DICOMIMAGEVOLUME Summary of this class goes here
 	%   Detailed explanation goes here
 	
-	properties(Constant)
+	properties(Constant,Access=private)
 		logger = ether.log4m.Logger.getLogger('ether.process.DicomImageVolume');
 	end
 
@@ -23,11 +23,14 @@ classdef DicomImageVolume < ether.process.ImageVolume & ether.process.Loadable
 
 	methods
 		%-------------------------------------------------------------------------
-		function this = DicomImageVolume(id)
+		function this = DicomImageVolume(id, seriesList)
 			this@ether.process.ImageVolume(id);
 			this.imageMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 			this.seriesMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 			this.sopInstMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
+			if ~empty(seriesList)
+				this.createFromSeries(seriesList);
+			end
 		end
 
 		%-------------------------------------------------------------------------
@@ -137,8 +140,7 @@ classdef DicomImageVolume < ether.process.ImageVolume & ether.process.Loadable
 		end
 
 		%-------------------------------------------------------------------------
-		function loadStudy(this, study)
-			seriesList = study.getSeriesList();
+		function createFromSeries(this, seriesList)
 			series = seriesList.get(1);
 			this.modality = series.modality;
 			imageList = series.getImageList();
@@ -165,6 +167,64 @@ classdef DicomImageVolume < ether.process.ImageVolume & ether.process.Loadable
 					image = imageList.get(jj);
 					this.imageMap(image.uid) = image;
 				end
+			end
+
+			patient = loadSpec.patient;
+			this.patientDob = patient.birthDate;
+			this.patientId = patient.id;
+			this.patientName = patient.name;
+			study = patient.getStudyList().get(1);
+			this.studyUid = study.instanceUid;
+			this.createFromSeries(study.getSeriesList());
+	
+			values = this.imageMap.values;
+			images = [values{:}];
+			keys = arrayfun(@this.naturalOrderKey, images);
+			[~,sortIdx] = sort(keys);
+			images = images(sortIdx);
+			refImage = images(1);
+			allCols = arrayfun(@(image) image.columns, images);
+			allRows = arrayfun(@(image) image.rows, images);
+			if (~all(allCols == refImage.columns) || ~all(allRows == refImage.rows))
+				throw(MException('Ether:Process:DicomImageVolume', ...
+					'Image XY dimensions not equal'));
+			end
+			nX = refImage.columns;
+			x = zeros(nX, 1);
+			x(1:end) = 1:nX;
+			xDim = Dimension({x}, {'X'});
+			nY = refImage.columns;
+			y = zeros(nY, 1);
+			y(1:end) = 1:nY;
+			yDim = Dimension({y}, {'Y'});
+			sliceLocs = arrayfun(@(image) image.sliceLocation, images);
+			[uniqueLocs, ~, idxUnique] = unique(sliceLocs);
+			nZ = numel(uniqueLocs);
+			z = uniqueLocs;
+			zDim = Dimension({z}, {'Z'});
+			nVolumes = numel(images)/nZ;
+			volumes = zeros(nVolumes, 1);
+			volumes(1:end) = 1:nVolumes;
+			volumeDim = Dimension({volumes}, {'Volume'});
+			this.dimensions = [xDim;yDim;zDim;volumeDim];
+			this.pixelData = zeros(nX, nY, nZ, nVolumes, 'single');
+			overrides = loadSpec.getOverrides;
+			for ii=1:nVolumes
+				for jj=1:nZ
+					idx = (ii-1)*nZ+jj;
+					image = images(idx);
+					z = idxUnique(idx);
+					this.pixelData(:,:,z,ii) = image.pixelData;
+					this.setImageOverrides(image, overrides);
+					image.unload;
+				end
+			end
+			this.valueType = [this.modality,'Signal'];
+			this.isReady = true;
+			if this.logger.isEnabled(ether.log4m.Level.DEBUG)
+				this.logger.debug(sprintf('(%ix%ix%ix%i) DicomImageVolume "%s" loaded', ...
+					this.dimensions(1).length, this.dimensions(2).length, ...
+					this.dimensions(3).length, this.dimensions(4).length, this.label));
 			end
 		end
 

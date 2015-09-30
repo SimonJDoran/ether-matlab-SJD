@@ -1,4 +1,5 @@
 function CM = radiological(N)
+%RADIOLOGICAL Generates radiological colour scale
 
 if nargin==0, N = 64; end
 

@@ -1,5 +1,5 @@
 function string = formatException(ex)
-%FORMATEXCEPTION Summary of this function goes here
+%FORMATEXCEPTION Formats exception as string
 %   Detailed explanation goes here
 	string = sprintf('%s: %s', ex.identifier, ex.message);
 	for ii=1:numel(ex.stack)

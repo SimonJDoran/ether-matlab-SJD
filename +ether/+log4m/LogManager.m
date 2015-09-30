@@ -4,8 +4,7 @@ classdef (Sealed) LogManager < handle
 	% The LogManager is used to retrieve Logger instances and operate on the
 	% current LoggerRepository.
 	properties(Access=private)
-		loggerRepo
-		xmlFile = 'log4m.xml';
+		loggerRepo;
 	end
 
 	%----------------------------------------------------------------------------
@@ -14,7 +13,10 @@ classdef (Sealed) LogManager < handle
 		%-------------------------------------------------------------------------
 		function logger = getLogger(name)
 			% Return the named Logger.
-			logger = ether.log4m.LogManager.getLogger(name);
+			if (nargin == 0)
+				name = 'root';
+			end
+			logger = ether.log4m.LogManager.getLogManager.loggerRepo.getLogger(name);
 		end
 
 		%-------------------------------------------------------------------------
@@ -42,7 +44,9 @@ classdef (Sealed) LogManager < handle
 			% Reset the logging system to its original configuration
 			import ether.log4m.*;
 			Log4M.debug('LogManager::reset()');
-			LogManager.getLoggerRepository.resetConfiguration;
+			log4M = Log4M.getLog4M;
+			Log4M.configure(log4M.pattern);
+			LogManager.getLoggerRepository.configure(log4M.configuration);
 		end
 
 		%-------------------------------------------------------------------------
@@ -84,29 +88,13 @@ classdef (Sealed) LogManager < handle
 
 		%-------------------------------------------------------------------------
 		function configureRepo(this, pattern)
-			config = this.getConfig(pattern);
-			if (isempty(config))
-				this.configureRepoDefault;
-				return;
+			import ether.log4m.*;
+			Log4M.debug(['LogManager::configureRepo(',pattern,')']);
+			log4m = Log4M.getLog4M();
+			if ~strcmp(log4m.pattern, pattern)
+				Log4M.configure(pattern);
 			end
-		end
-
-		%-------------------------------------------------------------------------
-		function configureRepoDefault(this)
-			rootLogger = this.loggerRepo.getRootLogger;
-			rootLogger.addAppender(ether.log4m.ConsoleAppender());
-		end
-
-		%-------------------------------------------------------------------------
-		function config = getConfig(this, pattern)
-			configFile = [ether.getUserDir,filesep,'.',pattern,filesep,this.xmlFile];
-			ether.log4m.Log4M.debug(['Reading configuration from ',configFile]);
-			try
-				config = xmlread(configFile);
-			catch me
-				ether.log4m.Log4M.error(['Error reading configuration - ',me.message]);
-				config = [];
-			end
+			this.loggerRepo.configure(log4m.configuration);
 		end
 
 		%-------------------------------------------------------------------------

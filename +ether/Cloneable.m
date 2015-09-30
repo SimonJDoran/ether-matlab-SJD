@@ -1,5 +1,5 @@
 classdef Cloneable < handle
-	%CLONEABLE Summary of this class goes here
+	%CLONEABLE Interface definition for cloneable objects
 	%   Detailed explanation goes here
 
 	properties

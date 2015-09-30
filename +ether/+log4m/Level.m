@@ -8,8 +8,17 @@ classdef Level < handle
 	%----------------------------------------------------------------------------
 	%	Public constant properties
 	properties(Constant)
+		% Log detailed trace information on execution.
+		TRACE = 1;
+
 		% Log debug information, typically internal state updates and data.
 		DEBUG = 2;
+
+		% Log information useful to a user.
+		INFO = 3;
+
+		% Log warning information.
+		WARN = 4;
 
 		% Log serious but usually recoverable errors.
 		ERROR = 5;
@@ -17,20 +26,11 @@ classdef Level < handle
 		% Log errors that cannot be recovered from.
 		FATAL = 6;
 
-		% Log information useful to a user.
-		INFO = 3;
-
 		% Turn off all logging.
 		NONE = 7;
 
-		% Log detailed trace information on execution.
-		TRACE = 1;
-
 		% Unspecified log level.
 		UNSET = 2^16;
-
-		% Log warning information.
-		WARN = 4;
 	end
 
 	%----------------------------------------------------------------------------

@@ -22,7 +22,7 @@ classdef PathScanner < handle
 		%-------------------------------------------------------------------------
 		function removePathScanListener(this, listeners)
 			for ii=1:numel(listeners)
-				this.delete(listeners(ii));
+				delete(listeners(ii));
 			end
 		end
 
@@ -31,6 +31,9 @@ classdef PathScanner < handle
 			this.logger.info(@() sprintf('Scanning %s', path));
 			tic;
 			fileList = ether.collect.CellArrayList('ether.String');
+			if exist('recurse', 'var') ~= 1
+				recurse = false;
+			end
 			this.buildFileList(path, fileList, recurse);
 			fileCount = fileList.size;
 			validCount = 0;

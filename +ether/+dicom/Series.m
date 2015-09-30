@@ -51,6 +51,11 @@ classdef Series < handle
 		end
 
 		%-------------------------------------------------------------------------
+		function count = getImageCount(this)
+			count = this.imageMap.Count;
+		end
+
+		%-------------------------------------------------------------------------
 		function list = getImageList(this, orderBy)
 			list = ether.collect.CellArrayList('ether.dicom.Image');
 			values = this.imageMap.values;
@@ -67,6 +72,11 @@ classdef Series < handle
 			if this.sopInstMap.isKey(uid)
 				sopInst = this.sopInstMap(uid);
 			end
+		end
+
+		%-------------------------------------------------------------------------
+		function count = getSopInstanceCount(this)
+			count = this.sopInstMap.Count;
 		end
 
 		%-------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 function [gradient,intercept] = regress(x, y)
-%regress Linear regression over N-dimensional array.
+%REGRESS Linear regression over N-dimensional array
 %
 %Auto-detects the sample dimension of the array for regression.
 

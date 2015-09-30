@@ -61,6 +61,10 @@ classdef CellArrayList < ether.collect.List
 
 		%-------------------------------------------------------------------------
 		function display(this)
+			if (isempty(this))
+				fprintf('0x0 CellArrayList<?>\n');
+				return;
+			end
 			fprintf('List<%s>\n', this.type);
 			for i=1:this.nCell
 				fprintf('  [%i] - ', i);
@@ -70,15 +74,24 @@ classdef CellArrayList < ether.collect.List
 
 		%-------------------------------------------------------------------------
 		function items = get(this, idx)
-			if ~all(isnumeric(idx))
-				me = MException('Ether:List:InvalidIndex', ...
-					'Indices non-numeric');
-				throw(me);
-			end
-			if ~(all(idx > 0) && all(idx <= this.nCell))
-				me = MException('Ether:List:IndexOutOfBounds', ...
-					'Indices must be 1 < idx < List.size()');
-				throw(me);
+			if all(isnumeric(idx))
+				if ~(all(idx > 0) && all(idx <= this.nCell))
+					me = MException('Ether:List:IndexOutOfBounds', ...
+						'Indices must be 1 < idx < List.size()');
+					throw(me);
+				end
+			else
+				if all(islogical(idx))
+					if numel(idx) ~= this.nCell
+						me = MException('Ether:List:InvalidIndex', ...
+							'Logical indices must match list length');
+						throw(me);
+					end
+				else
+					me = MException('Ether:List:InvalidIndex', ...
+						'Indices non-numeric');
+					throw(me);
+				end
 			end
 			cells = this.array(idx);
 			% Return non-cell array as all items known to be of type
@@ -93,7 +106,7 @@ classdef CellArrayList < ether.collect.List
 
 		%-------------------------------------------------------------------------
 		function bool = isEmpty(this)
-			bool = this.nItem == 0;
+			bool = this.nCell == 0;
 		end
 
 		%-------------------------------------------------------------------------
@@ -119,6 +132,11 @@ classdef CellArrayList < ether.collect.List
 		%-------------------------------------------------------------------------
 		function items = toArray(this)
 			items = [this.array{1:this.nCell}];
+		end
+
+		%-------------------------------------------------------------------------
+		function items = toCellArray(this)
+			items = {this.array{1:this.nCell}};
 		end
 
 	end

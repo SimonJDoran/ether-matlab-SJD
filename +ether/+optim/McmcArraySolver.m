@@ -11,7 +11,7 @@ classdef McmcArraySolver < ether.optim.Solver
 	
 	properties(Access=private)
 		halfX;
-		likelihood = ether.optim.Solver.L2;
+		likelihood;
 		lnGammaN;
 		lnGammaNByTwo;
 		lnTwo = log(2);
@@ -34,6 +34,7 @@ classdef McmcArraySolver < ether.optim.Solver
 			this.name = 'MCMC (Array)';
 			this.description = 'Markov Chain Monte Carlo (Array)';
 			this.sigmaType = ether.optim.Solver.SD;
+			this.likelihood = ether.optim.Solver.L2;
 		end
 
 		%-------------------------------------------------------------------------

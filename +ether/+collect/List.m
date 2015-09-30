@@ -38,6 +38,9 @@ classdef List < handle
 		% Return all items in the List as an array.
 		items = toArray(this);
 
+		% Return all items in the List as an cell array.
+		items = toCellArray(this);
+
 	end
 
 	%----------------------------------------------------------------------------

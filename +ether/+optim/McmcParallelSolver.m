@@ -11,7 +11,7 @@ classdef McmcParallelSolver < ether.optim.Solver
 	
 	properties(Access=private)
 		halfX;
-		likelihood = ether.optim.Solver.L2;
+		likelihood;
 		lnGammaN;
 		lnGammaNByTwo;
 		lnTwo = log(2);
@@ -33,6 +33,7 @@ classdef McmcParallelSolver < ether.optim.Solver
 		function this = McmcParallelSolver()
 			this.name = 'MCMC';
 			this.description = 'Markov Chain Monte Carlo';
+			this.likelihood = ether.optim.Solver.L2;
 		end
 
 		%-------------------------------------------------------------------------

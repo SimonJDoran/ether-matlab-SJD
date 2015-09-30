@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE log4m [
+	<!ELEMENT log4m (logger*)>
+	<!ATTLIST log4m
+		debug (true|false) #IMPLIED
+	>
+	<!ELEMENT logger (appender*)>
+	<!ATTLIST logger
+		name CDATA #REQUIRED
+		level (TRACE|trace|DEBUG|debug|INFO|info|WARN|warn|ERROR|error|FATAL|fatal|NONE|none) #REQUIRED
+	>
+	<!ELEMENT appender (key-value*)>
+	<!ATTLIST appender
+		class CDATA #REQUIRED
+	>
+	<!ELEMENT key-value EMPTY>
+	<!ATTLIST key-value
+		key CDATA #REQUIRED
+		value CDATA #REQUIRED
+	>
+]>
+
+<log4m debug="true">
+	<logger name="root" level="debug">
+		<appender class="ether.log4m.ConsoleAppender" />
+		<appender class="ether.log4m.RollingFileAppender" />
+			<key-value key="File" value="ether.log" />
+			<key-value key="MaxFileSize" value="1M" />
+			<key-value key="MaxRetainIndex" value="9" />
+		</appender>
+	</logger>
+	<logger name="ether.app" level="trace" />
+</log4m>

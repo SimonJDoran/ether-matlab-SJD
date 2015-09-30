@@ -11,10 +11,12 @@ classdef PatientRoot < handle
 	end
 	
 	methods
+		%-------------------------------------------------------------------------
 		function this = PatientRoot()
 			this.patientMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 		end
 
+		%-------------------------------------------------------------------------
 		function addPatient(this, patient)
 			nPatients = numel(patient);
 			for ii=1:nPatients
@@ -27,12 +29,18 @@ classdef PatientRoot < handle
 			end
 		end
 
+		%-------------------------------------------------------------------------
 		function patient = getPatient(this, id)
 			patient = [];
 			idIdx = this.patientMap.isKey(id);
 			if any(idIdx)
 				patient = this.patientMap(id(idIdx));
 			end
+		end
+
+		%-------------------------------------------------------------------------
+		function ids = getPatientIds(this)
+			ids = this.patientMap.keys();
 		end
 
 		%-------------------------------------------------------------------------
@@ -46,10 +54,12 @@ classdef PatientRoot < handle
 			list.add(patients);
 		end
 
+		%-------------------------------------------------------------------------
 		function hasId = hasPatient(this, id)
 			hasId = this.patientMap.isKey(id);
 		end
 
+		%-------------------------------------------------------------------------
 		function patient = removePatient(this, id)
 			patient = [];
 			idIdx = this.patientMap.isKey(id);

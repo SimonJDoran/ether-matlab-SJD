@@ -1,5 +1,5 @@
 function bool = startsWith(str, prefix)
-%STARTSWITH Summary of this function goes here
+%STARTSWITH Determine if one string starts with another
 %   Detailed explanation goes here
 
 	found = strfind(str, prefix);

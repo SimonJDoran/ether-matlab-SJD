@@ -15,6 +15,17 @@ classdef AbstractApplication < handle
 		%-------------------------------------------------------------------------
 		function run(this)
 			this.logger.info(@() sprintf('%s startup', this.productName));
+			path = [ether.getUserDir,filesep,'.',this.productTag];
+			if (exist(path, 'dir') ~= 7)
+				[status,message,messageId] = mkdir(path);
+				if ~status
+					this.logger.warn(@() sprintf('%s not created. %s - %s', ...
+						path, messageId, message));
+				else
+					this.logger.info(@() sprintf('%s created', path));
+				end
+			end
+				
 		end
 	end
 

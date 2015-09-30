@@ -25,25 +25,28 @@ classdef Pool < handle
 		end
 
 		function poolSize = size()
-			poolSize = matlabpool('size');
+			poolSize = 0;
+			currPool = gcp('nocreate');
+			if ~isempty(currPool)
+				poolSize = currPool.NumWorkers;
+			end
 		end
 
 		function [poolSize,enabled] = start()
 			enabled = ether.parallel.Pool.pool.enabled;
+			poolSize = 0;
 			if ~enabled
-				poolSize = 0;
 				return;
 			end
 			% Launch the default local pool if no pool found.
-			poolSize = matlabpool('size');
-			if poolSize == 0
-				matlabpool
+			currPool = gcp();
+			if ~isempty(currPool)
+				poolSize = currPool.NumWorkers;
 			end
-			poolSize = matlabpool('size');
 		end
 
 		function stop()
-			matlabpool('close');
+			delete(gcp('nocreate'));
 		end
 	end
 	
