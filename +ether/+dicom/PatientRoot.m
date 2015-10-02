@@ -1,5 +1,5 @@
 classdef PatientRoot < handle
-	%ROOT Summary of this class goes here
+	%PATIENTROOT Container for DICOM Patients
 	%   Detailed explanation goes here
 	
 	properties(Constant)

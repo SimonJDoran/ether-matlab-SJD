@@ -1,6 +1,7 @@
 classdef Study < handle
-	%STUDY Summary of this class goes here
-	%   Detailed explanation goes here
+	%STUDY DICOM Study
+	%   A Study has a UID and contains zero or more Series. Each Study belongs to
+	%   a Patient.
 
 	properties
 		date;

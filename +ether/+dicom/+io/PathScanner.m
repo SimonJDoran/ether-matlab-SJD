@@ -1,15 +1,18 @@
 classdef PathScanner < handle
-	%PATHSCANNER Summary of this class goes here
+	%PATHSCANNER Searches a directory heirarchy for DICOM files (SopInstances)
 	%   Detailed explanation goes here
 	
+	%----------------------------------------------------------------------------
 	properties(Constant,Access=private)
 		logger = ether.log4m.Logger.getLogger('ether.dicom.io.PathScanner');
 	end
 
+	%----------------------------------------------------------------------------
 	events
 		SopInstanceFound
 	end
 
+	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
 		function addPathScanListener(this, listeners)
@@ -27,7 +30,8 @@ classdef PathScanner < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function [validCount,fileCount] = scan(this, path, recurse)
+		function [validCount,fileCount] = scan(this, pathIn, recurse)
+			path = strrep(pathIn, '\', '/');
 			this.logger.info(@() sprintf('Scanning %s', path));
 			tic;
 			fileList = ether.collect.CellArrayList('ether.String');
@@ -47,9 +51,11 @@ classdef PathScanner < handle
 		end
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Access=private)
 		%-------------------------------------------------------------------------
 		function buildFileList(this, path, fileList, recurse)
+			import ether.File;
 			import ether.String;
 			this.logger.debug(@() sprintf('Building file list for: %s', path));
 			contents = dir(path);
@@ -58,14 +64,14 @@ classdef PathScanner < handle
 			contents = contents(validIdx);
 			fileIdx = arrayfun(@(x) ~x.isdir, contents);
 			files = contents(fileIdx);
-			fileFn = @(x) fileList.add(String(fullfile(path, x.name)));
+			fileFn = @(x) fileList.add(String(File.fullFile(path, x.name)));
 			arrayfun(fileFn, files);
 			if ~recurse
 				return;
 			end
 			dirs = contents(~fileIdx);
-			dirFn = @(x) this.buildFileList(fullfile(path, x.name), fileList, ...
-				recurse);
+			dirFn = @(x) this.buildFileList(File.fullFile(path, x.name), ...
+				fileList, recurse);
 			arrayfun(dirFn, dirs);
 		end
 

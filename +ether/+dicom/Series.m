@@ -1,12 +1,14 @@
 classdef Series < handle
-	%SERIES Summary of this class goes here
-	%   Detailed explanation goes here
+	%SERIES DICOM Series
+	%   A Series has a UID, a modality and contains zero or more SopInstances and
+	%   zero or more Images. Each Series belongs to a Study.
 
 	properties
 		description;
 		instanceUid;
 		modality;
 		number;
+		studyUid;
 	end
 
 	properties(Access=private)
@@ -21,6 +23,7 @@ classdef Series < handle
 			this.description = [];
 			this.modality = [];
 			this.number = 65536;
+			this.studyUid = '';
 			this.sopInstMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 			this.imageMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 		end

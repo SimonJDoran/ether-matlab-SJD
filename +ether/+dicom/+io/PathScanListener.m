@@ -1,11 +1,14 @@
 classdef PathScanListener < handle
-	%PATHSCANLISTENER Summary of this class goes here
+	%PATHSCANLISTENER Interface: Listens to SopInstanceFound events emitted by PathScanner
 	%   Detailed explanation goes here
 
+	%----------------------------------------------------------------------------
 	properties
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Abstract)
+		%-------------------------------------------------------------------------
 		sopInstanceFound(this, source, data);
 	end
 

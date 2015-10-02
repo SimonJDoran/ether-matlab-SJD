@@ -1,5 +1,5 @@
 classdef Modality
-	%MODALITY Summary of this class goes here
+	%MODALITY String constants for defined modalities
 	%   Detailed explanation goes here
 
 	properties(Constant)

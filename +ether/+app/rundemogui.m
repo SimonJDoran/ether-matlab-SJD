@@ -1,5 +1,5 @@
 function varargout = rundemogui(varargin)
-%ADEPT Summary of this function goes here
+%RUNDEMOGUI Launch the demonstration GUI application
 %   Detailed explanation goes here
 
 	varargout = {};

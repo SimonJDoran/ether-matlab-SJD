@@ -1,6 +1,6 @@
 classdef UID < handle
-	%UID Provides easy access to DICOM's pre-defined UIDs as constant strings.
-	%   Detailed explanation goes here
+	%UID String constants for UIDs with UID name retrieval
+	%   Provides easy access to DICOM's pre-defined UIDs as constant strings.
 
 	properties(Constant)
 		ImplicitVRLittleEndian = '1.2.840.10008.1.2';

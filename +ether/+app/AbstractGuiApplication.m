@@ -1,12 +1,15 @@
 classdef AbstractGuiApplication < ether.app.AbstractApplication
-	%ABSTRACTGUIAPPLICATION Summary of this class goes here
-	%   Detailed explanation goes here
+	%ABSTRACTGUIAPPLICATION Base class for GUI applications
+	%   Subclasses AbstractApplication adding minimum GUI functionality.
+	%   Automatically deletes itself when frame closes.
 
+	%----------------------------------------------------------------------------
 	properties(SetAccess=private)
 		frame;
 		mouseListeners = {};
 	end
 
+	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
 		function run(this)
@@ -28,6 +31,7 @@ classdef AbstractGuiApplication < ether.app.AbstractApplication
 
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Sealed)
 		%-------------------------------------------------------------------------
 		function added = addMouseListener(this, listeners)
@@ -47,6 +51,7 @@ classdef AbstractGuiApplication < ether.app.AbstractApplication
 		
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Abstract,Access=protected)
 		%-------------------------------------------------------------------------
 		initComponents(this);
@@ -58,6 +63,7 @@ classdef AbstractGuiApplication < ether.app.AbstractApplication
 		onMenuEvent(this, source, event);
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Access=private)
 		%-------------------------------------------------------------------------
 		function onMouseMoved(this, source, event)

@@ -1,13 +1,16 @@
 classdef Utils < handle
-	%UTILS Summary of this class goes here
+	%UTILS Utility functions for using DICOM data types
 	%   Detailed explanation goes here
 
+	%----------------------------------------------------------------------------
 	properties
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Static)
 		%-------------------------------------------------------------------------
 		function vec = daToDateVector(da)
+			% Convert DA (date) field to MATLAB datetime array format
 			if ~(ischar(da) && isvector(da) && (numel(da) == 8))
 				throw(MException('Ether:Dicom:daToDateVector', ...
 					'DA element must be 8 characters'));
@@ -16,7 +19,18 @@ classdef Utils < handle
 		end
 
 		%-------------------------------------------------------------------------
+		function da = dateToDA(date)
+			% Convert MATLAB datetime array format to DA (date) field
+			if ~(isnumeric(date) && isvector(date) && (numel(date) == 6))
+				throw(MException('Ether:Dicom:daToDateVector', ...
+					'DA element must be 8 characters'));
+			end
+			da = sprintf('%4i%02i%02i', date(1), date(2), date(3));
+		end
+
+		%-------------------------------------------------------------------------
 		function name = pnToString(pn)
+			% Convert PN (person name) field to string
 			name = pn.FamilyName;
 			if (isfield(pn, 'GivenName') && (numel(pn.GivenName) > 0))
 				name = sprintf('%s, %s', name, pn.GivenName);
@@ -25,6 +39,7 @@ classdef Utils < handle
 
 		%-------------------------------------------------------------------------
 		function time = tmToSeconds(tm)
+			% Convert TM (time) field to floating point seconds since midnight
 			if ~(ischar(tm) && isvector(tm) && (numel(tm) >= 2))
 				throw(MException('Ether:Dicom:Utils:tmToSeconds', ...
 					'TM element invalid'));
@@ -52,6 +67,7 @@ classdef Utils < handle
 
 		%-------------------------------------------------------------------------
 		function data = createTimingData(image)
+			% Create and populate a TimingData instance for an Image
 			import ether.dicom.*;
 			sopInst = image.sopInstance;
 			data = TimingData();
@@ -89,8 +105,11 @@ classdef Utils < handle
 
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Access=private)
+		%-------------------------------------------------------------------------
 		function this = Utils()
+			% Private constructor to prevent instantiation
 		end
 	end
 

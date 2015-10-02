@@ -1,5 +1,5 @@
 classdef SopInstance < handle
-	%SOPINSTANCE Summary of this class goes here
+	%SOPINSTANCE A DICOM dataset, often the contents of a part 10 file
 	%   Detailed explanation goes here
 	
 	properties(Constant)
@@ -19,10 +19,10 @@ classdef SopInstance < handle
 
 	properties(SetAccess=private)
 		isLoaded;
-		dicomInfo;
 	end
 
 	properties(Access=private)
+		dicomInfo;
 		isLoading = false;
 		overrideMap;
 		originalMap;
@@ -65,12 +65,12 @@ classdef SopInstance < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function dicomInfo = get.dicomInfo(this)
-			if (~this.isLoaded && this.autoLoad)
-				this.read;
-			end
-			dicomInfo = this.dicomInfo;
-		end
+% 		function dicomInfo = get.dicomInfo(this)
+% 			if (~this.isLoaded && this.autoLoad)
+% 				this.read;
+% 			end
+% 			dicomInfo = this.dicomInfo;
+% 		end
 
 		%-------------------------------------------------------------------------
 		function frameCount = get.frameCount(this)

@@ -1,6 +1,6 @@
 classdef Patient < handle
-	%PATIENT Summary of this class goes here
-	%   Detailed explanation goes here
+	%PATIENT DICOM Patient
+	%   A Patient has name, id and birth date, contains zero or more Studies
 
 	properties
 		birthDate;

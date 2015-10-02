@@ -1,11 +1,14 @@
 classdef ConsoleDumpScanListener < ether.dicom.io.PathScanListener
-	%CONSOLEDUMPSCANLISTENER Summary of this class goes here
+	%CONSOLEDUMPSCANLISTENER Prints SOP class and file name of each SopInstance
 	%   Detailed explanation goes here
 
+	%----------------------------------------------------------------------------
 	properties
 	end
 
+	%----------------------------------------------------------------------------
 	methods
+		%-------------------------------------------------------------------------
 		function sopInstanceFound(~, ~, data)
 			sopInst = data.sopInstance;
 			sopClass = ether.dicom.UID.nameOf(sopInst.sopClassUid);

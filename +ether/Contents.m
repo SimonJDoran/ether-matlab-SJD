@@ -1,7 +1,7 @@
 % +ETHER
 %
 % Files
-%   Cloneable       - Interface definition for cloneable objects
+%   Cloneable       - Interface: Object can clone itself
 %   String          - Wrapper class for string for ether.collect.CellArrayList
 %   Thing           - Named entity
 %   Xml             - Collection of utility methods for XML processing

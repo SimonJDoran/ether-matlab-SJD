@@ -1,16 +1,21 @@
 classdef AbstractApplication < handle
-	%ABSTRACTAPPLICATION Summary of this class goes here
-	% Detailed explanation goes here
+	%ABSTRACTAPPLICATION Base class for applications
+	% Simple infrastructure ensures application specific data directory exists in
+	% user's home directory. Automatically deletes itself on subclasses calling
+	% exit().
 
+	%----------------------------------------------------------------------------
 	properties(Constant,Access=private)
 		logger = ether.log4m.Logger.getLogger('ether.app.AbstractApplication');
 	end
 
+	%----------------------------------------------------------------------------
 	properties(SetAccess=protected)
 		productName = 'EtherAbstractApplication';
 		productTag = 'ether';
 	end
 
+	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
 		function run(this)
@@ -29,6 +34,7 @@ classdef AbstractApplication < handle
 		end
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Access=protected)
 		%-------------------------------------------------------------------------
 		function exit(this)

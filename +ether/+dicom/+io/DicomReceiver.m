@@ -1,17 +1,20 @@
 classdef DicomReceiver < ether.dicom.io.PathScanListener
-	%DICOMSCANNER Summary of this class goes here
-	%   Detailed explanation goes here
+	%DICOMRECEIVER Builds PatientRoot from SopInstances
+	%   Additional PatientRoots created if duplicate SopInstances found 
 
+	%----------------------------------------------------------------------------
 	properties(Constant,Access=private)
 		logger = ether.log4m.Logger.getLogger('ether.dicom.io.DicomReceiver');
 	end
 
+	%----------------------------------------------------------------------------
 	properties(Access=private)
 		patientMap;
 		sopInstMap;
 		duplicates;
 	end
 
+	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
 		function this = DicomReceiver()
@@ -45,6 +48,7 @@ classdef DicomReceiver < ether.dicom.io.PathScanListener
 
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Access=private)
 		%-------------------------------------------------------------------------
 		function dupe = findDuplicate(this, sopInst)
@@ -72,7 +76,7 @@ classdef DicomReceiver < ether.dicom.io.PathScanListener
 				this.patientMap(patientId) = patient;
 				this.logger.info(@() sprintf(...
 					'New patient. Name: %s, ID: %s, DOB: %s', ...
-					patient.name, patient.id, patient.birthDate));
+					patient.name, patient.id, datestr(patient.birthDate)));
 			end
 			patient = this.patientMap(patientId);
 		end

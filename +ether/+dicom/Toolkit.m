@@ -1,6 +1,6 @@
 classdef Toolkit < handle
-	%TOOLKIT Summary of this class goes here
-	%   Detailed explanation goes here
+	%TOOLKIT Factory class for ether.dicom
+	%   Allows static registration and retrieval of other Toolkit implementations
 
 	properties(Constant)
 		Default = 'Default';

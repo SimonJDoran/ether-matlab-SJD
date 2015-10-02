@@ -1,5 +1,5 @@
 classdef TimingData
-	%TIMINGDATA Summary of this class goes here
+	%TIMINGDATA Image timing information for temporal sorting
 	%   Detailed explanation goes here
 
 	properties

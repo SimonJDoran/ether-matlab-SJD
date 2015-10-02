@@ -1,6 +1,6 @@
 classdef DemoGui < ether.app.AbstractGuiApplication
-	%DEMOGUI Example class showing usage of Ether classes.
-	%   Detailed explanation goes here
+	%DEMOGUI Example class showing usage of Ether classes
+	%   Simple GUI to parse and display Images in DICOM heirarchies
 
 	properties(Constant,Access=private)
 		logger = ether.log4m.Logger.getLogger('ether.app.DemoGui', 'demogui');
@@ -38,9 +38,6 @@ classdef DemoGui < ether.app.AbstractGuiApplication
 			this.logger.trace('DemoGui::run()');
 			this.logger.info('DemoGui starting UI');
 			run@ether.app.AbstractGuiApplication(this);
-			for i=1:500
-				this.logger.debug(sprintf('Spurious logging iteration: %i', i));
-			end
 		end
 	end
 

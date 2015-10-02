@@ -289,6 +289,9 @@ classdef Logger < ether.log4m.AppenderAttachable & ether.log4m.Loggable
 			if ~this.isEnabled(level)
 				return
 			end
+			if nargin < 4
+				frames = 1;
+			end
 			output = [this.getPrefix(level, frames),message()];
 			this.callAppenders(output);
 		end

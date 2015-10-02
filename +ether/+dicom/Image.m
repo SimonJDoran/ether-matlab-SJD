@@ -1,5 +1,5 @@
 classdef Image < handle
-	%IMAGE Summary of this class goes here
+	%IMAGE 2D DICOM image frame
 	%   Detailed explanation goes here
 	
 	properties
