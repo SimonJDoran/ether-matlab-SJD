@@ -54,7 +54,7 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function columns = get.columns(this)
 			if (isempty(this.columns) && this.autoLoad)
-				this.columns = this.sopInstance.get('Columns');
+				this.columns = this.sopInstance.get(ether.dicom.Tag.Columns);
 			end
 			columns = this.columns;
 		end
@@ -62,7 +62,8 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function frameOfReferenceUid = get.frameOfReferenceUid(this)
 			if (isempty(this.frameOfReferenceUid) && this.autoLoad)
-				this.frameOfReferenceUid = this.sopInstance.get('FrameOfReferenceUID');
+				this.frameOfReferenceUid = this.sopInstance.get(...
+					ether.dicom.Tag.FrameOfReferenceUID);
 			end
 			frameOfReferenceUid = this.frameOfReferenceUid;
 		end
@@ -70,7 +71,8 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function imageOrientation = get.imageOrientation(this)
 			if (all(this.imageOrientation == 0) && this.autoLoad)
-				this.imageOrientation = this.sopInstance.get('ImageOrientationPatient');
+				this.imageOrientation = this.sopInstance.get(...
+					ether.dicom.Tag.ImageOrientationPatient);
 			end
 			imageOrientation = this.imageOrientation;
 		end
@@ -78,7 +80,8 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function imagePosition = get.imagePosition(this)
 			if (all(this.imagePosition == 0) && this.autoLoad)
-				this.imagePosition = this.sopInstance.get('ImagePositionPatient');
+				this.imagePosition = this.sopInstance.get(...
+					ether.dicom.Tag.ImagePositionPatient);
 			end
 			imagePosition = this.imagePosition;
 		end
@@ -86,7 +89,8 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function instanceNumber = get.instanceNumber(this)
 			if ((this.instanceNumber == 0) && this.autoLoad)
-				this.instanceNumber = this.sopInstance.get('InstanceNumber');
+				this.instanceNumber = this.sopInstance.get(...
+					ether.dicom.Tag.InstanceNumber);
 			end
 			instanceNumber = this.instanceNumber;
 		end
@@ -104,7 +108,8 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function pixelDepth = get.pixelDepth(this)
 			if ((this.pixelDepth == 0) && this.autoLoad)
-				this.pixelDepth = this.sopInstance.get('SliceThickness');
+				this.pixelDepth = this.sopInstance.get(...
+					ether.dicom.Tag.SliceThickness);
 			end
 			pixelDepth = this.pixelDepth;
 		end
@@ -112,7 +117,7 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function pixelHeight = get.pixelHeight(this)
 			if ((this.pixelHeight == 0) && this.autoLoad)
-				pixelSpacing = this.sopInstance.get('PixelSpacing');
+				pixelSpacing = this.sopInstance.get(ether.dicom.Tag.PixelSpacing);
 				this.pixelHeight = pixelSpacing(1);
 				this.pixelWidth = pixelSpacing(2);
 			end
@@ -122,7 +127,7 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function pixelWidth = get.pixelWidth(this)
 			if ((this.pixelWidth == 0) && this.autoLoad)
-				pixelSpacing = this.sopInstance.get('PixelSpacing');
+				pixelSpacing = this.sopInstance.get(ether.dicom.Tag.PixelSpacing);
 				this.pixelHeight = pixelSpacing(1);
 				this.pixelWidth = pixelSpacing(2);
 			end
@@ -132,7 +137,7 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function rows = get.rows(this)
 			if (isempty(this.rows) && this.autoLoad)
-				this.rows = this.sopInstance.get('Rows');
+				this.rows = this.sopInstance.get(ether.dicom.Tag.Rows);
 			end
 			rows = this.rows;
 		end
@@ -140,7 +145,7 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function windowCentre = get.windowCentre(this)
 			if ((this.windowCentre == 0) && this.autoLoad)
-				this.windowCentre = this.sopInstance.get('WindowCenter');
+				this.windowCentre = this.sopInstance.get(ether.dicom.Tag.WindowCenter);
 			end
 			windowCentre = this.windowCentre;
 		end
@@ -148,7 +153,7 @@ classdef Image < handle
 		%-------------------------------------------------------------------------
 		function windowWidth = get.windowWidth(this)
 			if ((this.windowWidth == 0) && this.autoLoad)
-				this.windowWidth = this.sopInstance.get('WindowWidth');
+				this.windowWidth = this.sopInstance.get(ether.dicom.Tag.WindowWidth);
 			end
 			windowWidth = this.windowWidth;
 		end
@@ -163,27 +168,28 @@ classdef Image < handle
 	methods(Access=private)
 		%-------------------------------------------------------------------------
 		function sopInstanceInfoChange(this, source, eventData)
+			import ether.dicom.*;
 			this.instanceNumber = this.sopInstance.instanceNumber;
-			this.seriesNumber = this.sopInstance.get('SeriesNumber');
-			this.rows = this.sopInstance.get('Rows');
-			this.columns = this.sopInstance.get('Columns');
-			this.frameOfReferenceUid = this.sopInstance.get('FrameOfReferenceUID');
-			pixelSpacing = this.sopInstance.get('PixelSpacing');
+			this.seriesNumber = this.sopInstance.get(Tag.SeriesNumber);
+			this.rows = this.sopInstance.get(Tag.Rows);
+			this.columns = this.sopInstance.get(Tag.Columns);
+			this.frameOfReferenceUid = this.sopInstance.get(Tag.FrameOfReferenceUID);
+			pixelSpacing = this.sopInstance.get(Tag.PixelSpacing);
 			this.pixelHeight = pixelSpacing(1);
 			this.pixelWidth = pixelSpacing(2);
-			this.pixelDepth = this.sopInstance.get('SliceThickness');
-			this.imageOrientation = this.sopInstance.get('ImageOrientationPatient');
-			this.imagePosition = this.sopInstance.get('ImagePositionPatient');
-			sliceLoc = this.sopInstance.get('SliceLocation');
+			this.pixelDepth = this.sopInstance.get(Tag.SliceThickness);
+			this.imageOrientation = this.sopInstance.get(Tag.ImageOrientationPatient);
+			this.imagePosition = this.sopInstance.get(Tag.ImagePositionPatient);
+			sliceLoc = this.sopInstance.get(Tag.SliceLocation);
 			if ~isempty(sliceLoc)
 				this.sliceLocation = sliceLoc;
 			end
-			patPos = this.sopInstance.get('PatientPosition');
+			patPos = this.sopInstance.get(Tag.PatientPosition);
 			if ~isempty(patPos)
 				this.patientPosition = patPos;
 			end
-			this.windowCentre = this.sopInstance.get('WindowCenter');
-			this.windowWidth = this.sopInstance.get('WindowWidth');
+			this.windowCentre = this.sopInstance.get(Tag.WindowCenter);
+			this.windowWidth = this.sopInstance.get(Tag.WindowWidth);
 			this.pixelData = dicomread(this.sopInstance.filename, 'frames', ...
 				double(this.frame));
 			this.isLoaded = true;

@@ -70,15 +70,15 @@ classdef DicomReceiver < ether.dicom.io.PathScanListener
 
 		%-------------------------------------------------------------------------
 		function patient = findPatient(this, map, sopInst, toolkit)
-			patientId = sopInst.get('PatientID');
-			if ~map.isKey(patientId)
+			key = ether.dicom.Patient.makeKey(sopInst);
+			if ~map.isKey(key)
 				patient = toolkit.createPatient(sopInst);
-				this.patientMap(patientId) = patient;
+				this.patientMap(key) = patient;
 				this.logger.info(@() sprintf(...
 					'New patient. Name: %s, ID: %s, DOB: %s', ...
 					patient.name, patient.id, datestr(patient.birthDate)));
 			end
-			patient = this.patientMap(patientId);
+			patient = this.patientMap(key);
 		end
 
 		%-------------------------------------------------------------------------

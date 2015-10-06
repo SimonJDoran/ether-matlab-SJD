@@ -37,6 +37,8 @@ classdef DemoGui < ether.app.AbstractGuiApplication
 		function run(this)
 			this.logger.trace('DemoGui::run()');
 			this.logger.info('DemoGui starting UI');
+			toolkit = ether.dicom.Toolkit.getToolkit();
+			toolkit.useJava = true;
 			run@ether.app.AbstractGuiApplication(this);
 		end
 	end

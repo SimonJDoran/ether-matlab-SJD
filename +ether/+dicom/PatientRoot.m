@@ -20,9 +20,9 @@ classdef PatientRoot < handle
 		function addPatient(this, patient)
 			nPatients = numel(patient);
 			for ii=1:nPatients
-				id = patient(ii).id;
-				if ~this.patientMap.isKey(id)
-					this.patientMap(id) = patient(ii);
+				key = patient(ii).getKey();
+				if ~this.patientMap.isKey(key)
+					this.patientMap(key) = patient(ii);
 				else
 					this.logger.warn('TODO: Implement merging of patients');
 				end
@@ -30,11 +30,11 @@ classdef PatientRoot < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function patient = getPatient(this, id)
+		function patient = getPatient(this, key)
 			patient = [];
-			idIdx = this.patientMap.isKey(id);
-			if any(idIdx)
-				patient = this.patientMap(id(idIdx));
+			keyIdx = this.patientMap.isKey(key);
+			if any(keyIdx)
+				patient = this.patientMap(key(keyIdx));
 			end
 		end
 
@@ -55,17 +55,17 @@ classdef PatientRoot < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function hasId = hasPatient(this, id)
-			hasId = this.patientMap.isKey(id);
+		function hasKey = hasPatient(this, key)
+			hasKey = this.patientMap.isKey(key);
 		end
 
 		%-------------------------------------------------------------------------
-		function patient = removePatient(this, id)
+		function patient = removePatient(this, key)
 			patient = [];
-			idIdx = this.patientMap.isKey(id);
-			if any(idIdx)
-				patient = this.patientMap(id(idIdx));
-				this.patientMap.remove(id(idIdx));
+			keyIdx = this.patientMap.isKey(key);
+			if any(keyIdx)
+				patient = this.patientMap(key(keyIdx));
+				this.patientMap.remove(key(keyIdx));
 			end
 		end
 

@@ -2,19 +2,31 @@ classdef Toolkit < handle
 	%TOOLKIT Factory class for ether.dicom
 	%   Allows static registration and retrieval of other Toolkit implementations
 
+	%----------------------------------------------------------------------------
 	properties(Constant)
 		Default = 'Default';
 	end
 
+	%----------------------------------------------------------------------------
 	properties(Constant,Access=private)
 		toolkitMap = containers.Map(ether.dicom.Toolkit.Default, ...
 			ether.dicom.Toolkit());
+		logger = ether.log4m.Logger.getLogger('ether.dicom.Toolkit');
 	end
 
+	%----------------------------------------------------------------------------
+	properties
+		useJava = false;
+	end
+
+	%----------------------------------------------------------------------------
 	properties(Access=private)
 		imageUidMap;
+		javaOk = true;
+		javaTested = false;
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Static)
 		%-------------------------------------------------------------------------
 		function toolkit = getToolkit(key)
@@ -42,6 +54,7 @@ classdef Toolkit < handle
 		end
 	end
 
+	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
 		function images = createImages(~, sopInst)
@@ -49,7 +62,7 @@ classdef Toolkit < handle
 			if ~isa(sopInst, 'ether.dicom.SopInstance')
 				throw(MException('Ether:DICOM:Toolkit', 'Not a valid SOP instance'));
 			end
-			nImages = sopInst.frameCount;
+			nImages = sopInst.numberOfFrames;
 			images = Image.empty(nImages, 0);
 			% TODO: Create images based on SOP Class UID of sopInst
 			for ii=1:nImages
@@ -67,10 +80,9 @@ classdef Toolkit < handle
 			import ether.dicom.*;
 			if (nargin == 2 && isa(varargin{1}, 'ether.dicom.SopInstance'))
 				sopInst = varargin{1};
-				pn = sopInst.get('PatientName');
-				name = Utils.pnToString(pn);
-				id = sopInst.get('PatientID');
-				da = sopInst.get('PatientBirthDate');
+				name = sopInst.get(Tag.PatientName);
+				id = sopInst.get(Tag.PatientID);
+				da = sopInst.get(Tag.PatientBirthDate);
 				birthDate = Utils.daToDateVector(da);
 			else
 				name = varargin{1};
@@ -82,6 +94,7 @@ classdef Toolkit < handle
 
 		%-------------------------------------------------------------------------
 		function series = createSeries(~, arg)
+			import ether.dicom.*;
 			if ~isa(arg, 'ether.dicom.SopInstance')
 				% arg should be UID
 				series = ether.dicom.Series(arg);
@@ -90,13 +103,20 @@ classdef Toolkit < handle
 			sopInst = arg;
 			uid = sopInst.seriesUid;
 			series = ether.dicom.Series(uid);
-			series.number = sopInst.get('SeriesNumber');
-			series.description = sopInst.get('SeriesDescription');
+			series.number = sopInst.get(Tag.SeriesNumber);
+			series.description = sopInst.get(Tag.SeriesDescription);
 		end
 
 		%-------------------------------------------------------------------------
-		function sopInst = createSopInstance(~)
-			sopInst = ether.dicom.SopInstance();
+		function sopInst = createSopInstance(this)
+			if ~this.javaTested
+				this.testJava();
+			end
+			if this.useJava && this.javaOk
+				sopInst = ether.dicom.JavaSopInstance();
+			else
+				sopInst = ether.dicom.NativeSopInstance();
+			end
 		end
 
 		%-------------------------------------------------------------------------
@@ -109,9 +129,9 @@ classdef Toolkit < handle
 			sopInst = arg;
 			uid = sopInst.studyUid;
 			study = ether.dicom.Study(uid);
-			study.date = Utils.daToDateVector(sopInst.get('StudyDate'));
-			study.description = sopInst.get('StudyDescription');
-			study.id = sopInst.get('StudyID');
+			study.date = Utils.daToDateVector(sopInst.get(Tag.StudyDate));
+			study.description = sopInst.get(Tag.StudyDescription);
+			study.id = sopInst.get(Tag.StudyID);
 		end
 
 		%-------------------------------------------------------------------------
@@ -124,10 +144,13 @@ classdef Toolkit < handle
 
 	end
 
+	%----------------------------------------------------------------------------
 	methods(Access=private)
 		%-------------------------------------------------------------------------
 		function this = Toolkit()
 			this.imageUidMap = [];
+			this.javaOk = true;
+			this.javaTested = false;
 		end
 
 		%-------------------------------------------------------------------------
@@ -137,6 +160,24 @@ classdef Toolkit < handle
 			map(UID.MRImageStorage) = [];
 			map(UID.EnhancedMRImageStorage) = [];
 			map(UID.CTImageStorage) = [];
+		end
+
+		%-------------------------------------------------------------------------
+		function testJava(this)
+			try
+				testObject = javaObject('henson.DicomIoHandler');
+				this.javaOk = isjava(testObject);
+			catch ex
+				this.javaOk = false;
+				this.logger.warn(@() ...
+					sprintf('Exception: %s', ether.formatException(ex)));
+			end
+			this.javaTested = true;
+			if this.javaOk
+				this.logger.info('Java components of ether.dicom available');
+			else
+				this.logger.info('Java components of ether.dicom NOT available');
+			end
 		end
 
 	end
