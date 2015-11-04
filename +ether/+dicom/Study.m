@@ -4,6 +4,7 @@ classdef Study < handle
 	%   a Patient.
 
 	properties
+		accession;
 		date;
 		description;
 		id;
@@ -20,8 +21,9 @@ classdef Study < handle
 			this.instanceUid = uid;
 			this.seriesMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 			this.date = [0,0,0,0,0,0];
-			this.description = [];
-			this.id = [];
+			this.description = '';
+			this.id = '';
+			this.accession = '';
 		end
 
 		%-------------------------------------------------------------------------

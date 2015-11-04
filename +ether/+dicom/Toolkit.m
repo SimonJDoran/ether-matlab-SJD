@@ -16,7 +16,7 @@ classdef Toolkit < handle
 
 	%----------------------------------------------------------------------------
 	properties
-		useJava = false;
+		useJava = true;
 	end
 
 	%----------------------------------------------------------------------------
@@ -63,10 +63,18 @@ classdef Toolkit < handle
 				throw(MException('Ether:DICOM:Toolkit', 'Not a valid SOP instance'));
 			end
 			nImages = sopInst.numberOfFrames;
-			images = Image.empty(nImages, 0);
-			% TODO: Create images based on SOP Class UID of sopInst
-			for ii=1:nImages
-				images(ii) = Image(sopInst, ii);
+			if nImages > 0
+				if nImages == 1
+					images = MRImage(sopInst, 1);
+				else
+					images = EnhancedMRImage.empty(nImages, 0);
+					% TODO: Create images based on SOP Class UID of sopInst
+					for ii=1:nImages
+						images(ii) = EnhancedMRImage(sopInst, ii);
+					end
+				end
+			else
+				images = [];
 			end
 		end
 
@@ -80,9 +88,12 @@ classdef Toolkit < handle
 			import ether.dicom.*;
 			if (nargin == 2 && isa(varargin{1}, 'ether.dicom.SopInstance'))
 				sopInst = varargin{1};
-				name = sopInst.get(Tag.PatientName);
-				id = sopInst.get(Tag.PatientID);
-				da = sopInst.get(Tag.PatientBirthDate);
+				name = sopInst.getValue(Tag.PatientName);
+				id = sopInst.getValue(Tag.PatientID);
+				if isempty(id)
+					id = '';
+				end
+				da = sopInst.getValue(Tag.PatientBirthDate);
 				birthDate = Utils.daToDateVector(da);
 			else
 				name = varargin{1};
@@ -103,8 +114,14 @@ classdef Toolkit < handle
 			sopInst = arg;
 			uid = sopInst.seriesUid;
 			series = ether.dicom.Series(uid);
-			series.number = sopInst.get(Tag.SeriesNumber);
-			series.description = sopInst.get(Tag.SeriesDescription);
+			series.number = sopInst.getValue(Tag.SeriesNumber);
+			desc = sopInst.getValue(Tag.SeriesDescription);
+			if isempty(desc)
+				desc = '';
+			end
+			series.description = desc;
+			series.modality = sopInst.getValue(Tag.Modality);
+			series.time = Utils.tmToSeconds(sopInst.getValue(Tag.SeriesTime));
 		end
 
 		%-------------------------------------------------------------------------
@@ -129,9 +146,22 @@ classdef Toolkit < handle
 			sopInst = arg;
 			uid = sopInst.studyUid;
 			study = ether.dicom.Study(uid);
-			study.date = Utils.daToDateVector(sopInst.get(Tag.StudyDate));
-			study.description = sopInst.get(Tag.StudyDescription);
-			study.id = sopInst.get(Tag.StudyID);
+			study.date = Utils.daToDateVector(sopInst.getValue(Tag.StudyDate));
+			desc = sopInst.getValue(Tag.StudyDescription);
+			if isempty(desc)
+				desc = '';
+			end
+			study.description = desc;
+			id = sopInst.getValue(Tag.StudyID);
+			if isempty(id)
+				id = '';
+			end
+			study.id = id;
+			accession = sopInst.getValue(Tag.AccessionNumber);
+			if isempty(accession)
+				accession = '';
+			end
+			study.accession = accession;
 		end
 
 		%-------------------------------------------------------------------------
@@ -149,6 +179,7 @@ classdef Toolkit < handle
 		%-------------------------------------------------------------------------
 		function this = Toolkit()
 			this.imageUidMap = [];
+			this.useJava = true;
 			this.javaOk = true;
 			this.javaTested = false;
 		end
@@ -160,6 +191,7 @@ classdef Toolkit < handle
 			map(UID.MRImageStorage) = [];
 			map(UID.EnhancedMRImageStorage) = [];
 			map(UID.CTImageStorage) = [];
+			map(UID.EnhancedCTImageStorage) = [];
 		end
 
 		%-------------------------------------------------------------------------

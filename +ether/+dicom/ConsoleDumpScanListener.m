@@ -1,4 +1,4 @@
-classdef ConsoleDumpScanListener < ether.dicom.io.PathScanListener
+classdef ConsoleDumpScanListener < ether.dicom.PathScanListener
 	%CONSOLEDUMPSCANLISTENER Prints SOP class and file name of each SopInstance
 	%   Detailed explanation goes here
 

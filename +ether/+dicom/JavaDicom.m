@@ -6,134 +6,265 @@ classdef JavaDicom
 	properties(SetAccess=private)
 		jDcm;
 	end
-	
+
+	%----------------------------------------------------------------------------
+	properties(Access=private)
+		jSharedSq;
+		frameItemMap;
+	end
+
 	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
+		function [value,error,message] = getSequenceItemCount(this, seqPath)
+			% Returns the item count for the SQ given by seqPath
+			%   seqPath must be pairs of (sequence tag,index) finishing with an SQ tag
+			if (isvector(seqPath) && isinteger(seqPath) && ...
+				  (mod(size(seqPath, 2), 2) == 1))
+				[value,error,message] = this.getSequenceItemCount(seqPath);
+				return;
+			end
+			% TODO: Check seqPath is cell array that can be converted to uint32s
+			% and call private method
+			value = -1;
+			error = true;
+			message = 'Invalid SQ path specification';
+		end
+
+		%-------------------------------------------------------------------------
+		function [value,error,message] = getSequenceValue(this, seqPath, tag)
+			% Returns the item count for the SQ given by seqPath
+			%   seqPath must be pairs of (sequence tag,index)
+			if (isvector(seqPath) && isinteger(seqPath) && ...
+				  (mod(size(seqPath, 2), 2) == 0) && isinteger(tag))
+				[value,error,message] = this.getSequenceValueImpl(seqPath, tag);
+				return;
+			end
+			% TODO: Check seqPath is cell array that can be converted to uint32s
+			% and call private method
+			value = [];
+			error = true;
+			message = 'Invalid SQ path specification';
+		end
+
+		%-------------------------------------------------------------------------
 		function [value,error,message] = getValue(this, tag)
+			[value,error,message] = this.getValueImpl(this.jDcm, tag);
+		end
+
+		%-------------------------------------------------------------------------
+		function [vm,error,message] = getVM(this, tag)
+			[vm,error,message] = this.getVMImpl(this.jDcm, tag);
+		end
+
+		%-------------------------------------------------------------------------
+		function [vr,error,message] = getVR(this, tag)
+			[vr,error,message] = this.getVRImpl(this.jDcm, tag);
+		end
+
+		%-------------------------------------------------------------------------
+		function this = JavaDicom(jDcm)
+			if ~(isjava(jDcm) && ...
+				  isa(jDcm, 'org.dcm4che2.data.DicomObject'))
+				throw(MException('Ether:DICOM:IllegalArgument', ...
+					'JavaDicom must wrap Java class org.dcm4che2.data.DicomObject'));
+			end
+			this.jDcm = jDcm;
+			this.frameItemMap = containers.Map('KeyType', 'uint32', ...
+				'ValueType', 'any');
+		end
+	end
+
+	%----------------------------------------------------------------------------
+	methods(Access=private)
+		%-------------------------------------------------------------------------
+		function [value,error,message] = getSequenceItemCountImpl(this, seqPath)
+			import ether.dicom.*;
+			value = -1;
+			error = true;
+			message = '';
+			try
+				value = henson.Henson.getSequenceItemCount(this.jDcm, seqPath);
+				error = false;
+			catch ex
+				if(isa(ex, 'matlab.exception.JavaException'))
+					message = ex.errMsg;
+					ex.printStackTrace;
+				else
+					throw(ex);
+				end
+			end
+		end
+
+		%-------------------------------------------------------------------------
+		function [value,error,message] = getSequenceValueImpl(this, seqPath, tag)
 			import ether.dicom.*;
 			value = [];
-			[vr,error,message] = this.getVR(tag);
+			error = true;
+			try
+				switch seqPath(1)
+					% Per-frame functional group for multiframe
+					case Tag.PerFrameFunctionalGroupsSequence
+						frameIdx = seqPath(2);
+						if this.frameItemMap.isKey(frameIdx)
+							jDicom = this.frameItemMap(frameIdx);
+						else
+							jDicom = henson.Henson.getSequenceObject(this.jDcm, ...
+								seqPath(1:2));
+							if isempty(jDicom)
+								message = sprintf('No item in SQ %08x at index %i', ...
+									seqPath(1), frameIndex);
+								return;
+							end
+							this.frameItemMap(frameIdx) = jDicom;
+						end
+						finalPath = seqPath(3:end);
+
+					% General case of a SQ
+					otherwise
+						jDicom = this.jDcm;
+						finalPath = seqPath;
+				end
+				% Fetch the final item and value
+				jItemDcm = henson.Henson.getSequenceObject(jDicom, finalPath);
+				if isempty(jItemDcm)
+					message = 'No item found';
+					return;
+				end
+				[value,error,message] = this.getValueImpl(jItemDcm, tag);
+			catch ex
+				if(isa(ex, 'matlab.exception.JavaException'))
+					message = ex.message;
+					if isjava(ex.ExceptionObject)
+						ex.ExceptionObject.printStackTrace;
+					end
+				else
+					throw(ex);
+				end
+			end
+		end
+
+		%-------------------------------------------------------------------------
+		function [value,error,message] = getValueImpl(this, jDicom, tag)
+			import ether.dicom.*;
+			value = [];
+			[vr,error,message] = this.getVRImpl(jDicom, tag);
 			if error
 				return;
 			end
 			switch vr
 				case {'AE','AS','CS','LO','LT','PN','SH','ST','UI','UT'}
-					[vm,error,message] = this.getVM(tag);
+					[vm,error,message] = this.getVMImpl(jDicom, tag);
 					if (error || (vm == 0))
 						return;
 					end
 					if (vm == 1)
-						value = char(this.jDcm.getString(tag));
+						value = strtrim(char(jDicom.getString(tag)));
 					else
-						value = char(this.jDcm.getStrings(tag));
+						value = strtrim(char(jDicom.getStrings(tag)));
 						value = strjoin(value, '\');
 					end
 
 				case 'DS'
-					[vm,error,message] = this.getVM(tag);
+					[vm,error,message] = this.getVMImpl(jDicom, tag);
 					if (error || (vm == 0))
 						return;
 					end
 					if (vm == 1)
-						value = this.jDcm.getString(tag);
+						value = str2double(char(jDicom.getString(tag)));
 					else
-						value = char(this.jDcm.getStrings(tag));
+						value = arrayfun(@(x) str2double(char(x)), ...
+							jDicom.getStrings(tag));
 					end
-					value = str2double(value);
 
 				case 'IS'
-					[vm,error,message] = this.getVM(tag);
+					[vm,error,message] = this.getVMImpl(jDicom, tag);
 					if (error || (vm == 0))
 						return;
 					end
 					if (vm == 1)
-						value = this.jDcm.getString(tag);
+						value = int32(str2double(char(jDicom.getString(tag))));
 					else
-						value = char(this.jDcm.getStrings(tag));
+						value = arrayfun(@(x) int32(str2double(char(x))), ...
+							jDicom.getStrings(tag));
 					end
-					value = int32(str2double(value));
 
 				case {'DA','DT','TM'}
-					[vm,error,message] = this.getVM(tag);
+					[vm,error,message] = this.getVMImpl(jDicom, tag);
 					if (error || (vm == 0))
 						return;
 					end
-					value = char(this.jDcm.getString(tag));
+					value = strtrim(char(jDicom.getString(tag)));
 
 				case {'OF','FL'}
-					[vm,error,message] = this.getVM(tag);
+					[vm,error,message] = this.getVMImpl(jDicom, tag);
 					if (error || (vm == 0))
 						return;
 					end
 					if vm == 1
-						value = this.jDcm.getFloat(tag);
+						value = jDicom.getFloat(tag);
 					else
-						value = this.jDcm.getFloats(tag);
+						value = jDicom.getFloats(tag);
 					end
 
 				case 'FD'
-					[vm,error,message] = this.getVM(tag);
+					[vm,error,message] = this.getVMImpl(jDicom, tag);
 					if (error || (vm == 0))
 						return;
 					end
 					if vm == 1
-						value = this.jDcm.getDouble(tag);
+						value = jDicom.getDouble(tag);
 					else
-						value = this.jDcm.getDoubles(tag);
+						value = jDicom.getDoubles(tag);
 					end
 
 				case {'OB','UN'}
-					[vm,error,message] = this.getVM(tag);
+					[vm,error,message] = this.getVMImpl(jDicom, tag);
 					if (error || (vm == 0))
 						return;
 					end
-					value = this.jDcm.getBytes(tag);
+					value = jDicom.getBytes(tag);
 
 				case {'OW','US','SS'}
 					% PixelData can have VM == 1 and 1000's of pixels
 					if tag == Tag.PixelData
-						value = this.jDcm.getShorts(tag);
+						value = jDicom.getShorts(tag);
 						return;
 					end
 					% Java short == int16
-					[vm,error,message] = this.getVM(tag);
+					[vm,error,message] = this.getVMImpl(jDicom, tag);
 					if (error || (vm == 0))
 						return;
 					end
-					if vm == 1
-						value = this.jDcm.getShort(tag);
-					else
-						value = this.jDcm.getShorts(tag);
-					end
+					value = jDicom.getShorts(tag);
 
 				case {'AT','SL','UL'}
 					% Java int == int32
-					[vm,error,message] = this.getVM(tag);
+					[vm,error,message] = this.getVMImpl(jDicom, tag);
 					if (error || (vm == 0))
 						return;
 					end
 					if vm == 1
-						value = this.jDcm.getInt(tag);
+						value = jDicom.getInt(tag);
 					else
-						value = this.jDcm.getInts(tag);
+						value = jDicom.getInts(tag);
 					end
 
 				case 'SQ'
-					value = this.jDcm.get(tag);
+					value = jDicom.get(tag);
 
 				otherwise
 					error = true;
-					message = sprintf('Invalid VR for tag 0x%08x: %s', vr);
+					message = sprintf('Invalid VR for tag %s: %s', Tag.format(tag), vr);
 					return;
 			end
 		end
 
 		%-------------------------------------------------------------------------
-		function [vm,error,message] = getVM(this, tag)
+		function [vm,error,message] = getVMImpl(~, jDicom, tag)
 			message = '';
 			try
-				vm = this.jDcm.vm(tag);
+				vm = jDicom.vm(tag);
 				error = vm < 1;
 				if error
 					message = sprintf('Tag not found: 0x%08x', tag);
@@ -148,32 +279,21 @@ classdef JavaDicom
 		end
 
 		%-------------------------------------------------------------------------
-		function [vr,error,message] = getVR(this, tag)
+		function [vr,error,message] = getVRImpl(~, jDicom, tag)
 			vr = '';
 			message = '';
 			try
-				vr = char(henson.Henson.getVr(this.jDcm, tag));
+				vr = char(henson.Henson.getVr(jDicom, tag));
 				error = isempty(vr);
 			catch ex
 				error = true;
 				if(isa(ex, 'matlab.exception.JavaException'))
 					message = ex.errMsg;
-					
 					ex.printStackTrace;
 				end
 			end
 		end
-
-		%-------------------------------------------------------------------------
-		function this = JavaDicom(jDcm)
-			if ~isjava(jDcm) || ...
-				~isa(jDcm, 'org.dcm4che2.data.DicomObject')
-				throw(MException('Ether:DICOM:IllegalArgument', ...
-					'JavaDicom must wrap Java class org.dcm4che2.data.DicomObject'));
-			end
-			this.jDcm = jDcm;
-		end
 	end
-	
+
 end
 

@@ -29,7 +29,14 @@ classdef Tag
 
 		%{ Group 0x0018 }%
 		SliceThickness = uint32(hex2dec('00180050'));
+		RepetitionTime = uint32(hex2dec('00180080'));
+		EchoTime = uint32(hex2dec('00180081'));
+		InversionTime = uint32(hex2dec('00180082'));
+		FlipAngle = uint32(hex2dec('00181314'));
 		PatientPosition = uint32(hex2dec('00185100'));
+		EffectiveEchoTime = uint32(hex2dec('00189082'));
+		MRTimingAndRelatedParametersSequence = uint32(hex2dec('00189112'));
+		MREchoSequence = uint32(hex2dec('00189114'));
 
 		%{ Group 0x0020 }%
 		StudyID = uint32(hex2dec('00200010'));
@@ -41,6 +48,8 @@ classdef Tag
 		ImageOrientationPatient = uint32(hex2dec('00200037'));
 		FrameOfReferenceUID = uint32(hex2dec('00200052'));
 		SliceLocation = uint32(hex2dec('00201041'));
+		PlanePositionSequence = uint32(hex2dec('00209113'));
+		PlaneOrientationSequence = uint32(hex2dec('00209116'));
 
 		%{ Group 0x0028 }%
 		NumberOfFrames = uint32(hex2dec('00280008'));
@@ -49,6 +58,23 @@ classdef Tag
 		PixelSpacing = uint32(hex2dec('00280030'));
 		WindowCenter = uint32(hex2dec('00281050'));
 		WindowWidth = uint32(hex2dec('00281051'));
+		RescaleIntercept = uint32(hex2dec('00281052'));
+		RescaleSlope = uint32(hex2dec('00281053'));
+		PixelMeasuresSequence = uint32(hex2dec('00289110'));
+		FrameVOILUTSequence = uint32(hex2dec('00289132'));
+		PixelValueTransformationSequence = uint32(hex2dec('00289145'));
+
+		%{ Group 0x0029 - Philips }%
+		LegacyScaleIntercept = uint32(hex2dec('00291052'));
+		LegacyScaleSlope = uint32(hex2dec('00291053'));
+
+		%{ Group 0x2005 - Philips }%
+		ScaleIntercept = uint32(hex2dec('2005100d'));
+		ScaleSlope = uint32(hex2dec('2005100e'));
+
+		%{ Group 0x5200 }%
+		SharedFunctionalGroupsSequence = uint32(hex2dec('52009229'));
+		PerFrameFunctionalGroupsSequence = uint32(hex2dec('52009230'));
 
 		%{ Group 0x7fe0 }%
 		PixelData = uint32(hex2dec('7fe00010'));
@@ -61,6 +87,59 @@ classdef Tag
 
 	%----------------------------------------------------------------------------
 	methods(Static)
+		%-------------------------------------------------------------------------
+		function string = format(tag)
+			string = [];
+			if isnumeric(tag)
+				key = uint32(tag);
+				string = sprintf('(%04x,%04x)', bitshift(key, -16), ...
+					bitand(key, ether.dicom.Tag.ELEM_MASK));
+				return;
+			end
+			if ischar(tag)
+				try
+					key = uint32(hex2dec(tag));
+					string = sprintf('(%04x,%04x)', bitshift(key, -16), ...
+						bitand(key, ether.dicom.Tag.ELEM_MASK));
+				catch
+					return;
+				end
+			end
+		end
+
+		%-------------------------------------------------------------------------
+		function string = formatSequencePath(seqPath, names)
+			import ether.dicom.Tag;
+			string = [];
+			nPath = size(seqPath, 2);
+			if ~(isvector(seqPath) && isinteger(seqPath) && (nPath >= 1))
+				return;
+			end
+			odd = mod(nPath, 2) == 1;
+			if odd
+				nPath = nPath-1;
+			end
+			string = '';
+			if (nargin == 2) && names
+				for idx=1:2:nPath
+					string = sprintf('%s, %s[%i]', string, Tag.nameOf(seqPath(idx)), ...
+						seqPath(idx+1));
+				end
+				if odd
+					string = sprintf('%s, %s', string, Tag.nameOf(seqPath(nPath+1)));
+				end
+			else
+				for idx=1:2:nPath
+					string = sprintf('%s, %s[%i]', string, Tag.format(seqPath(idx)), ...
+						seqPath(idx+1));
+				end
+				if odd
+					string = sprintf('%s, %s', string, Tag.format(seqPath(nPath+1)));
+				end
+			end
+			string = string(3:end);
+		end
+
 		%-------------------------------------------------------------------------
 		function name = nameOf(tag)
 			name = [];

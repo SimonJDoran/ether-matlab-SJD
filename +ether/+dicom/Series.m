@@ -9,6 +9,7 @@ classdef Series < handle
 		modality;
 		number;
 		studyUid;
+		time;
 	end
 
 	properties(Access=private)
@@ -20,10 +21,11 @@ classdef Series < handle
 		%-------------------------------------------------------------------------
 		function this = Series(uid)
 			this.instanceUid = uid;
-			this.description = [];
-			this.modality = [];
+			this.description = '';
+			this.modality = '';
 			this.number = 65536;
 			this.studyUid = '';
+			this.time = 0;
 			this.sopInstMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 			this.imageMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 		end
@@ -39,7 +41,7 @@ classdef Series < handle
 				this.sopInstMap(uid) = sopInst;
 			end
 			images = toolkit.createImages(sopInst);
-			imageUids = arrayfun(@(x) x.uid, images, 'UniformOutput', false);
+			imageUids = arrayfun(@(x) x.getUid(), images, 'UniformOutput', false);
 			for ii=1:numel(imageUids)
 				this.imageMap(imageUids{ii}) = images(ii);
 			end
@@ -63,7 +65,7 @@ classdef Series < handle
 			list = ether.collect.CellArrayList('ether.dicom.Image');
 			values = this.imageMap.values;
 			images = [values{:}];
-			sortValues = arrayfun(@(x) x.frame, images);
+			sortValues = arrayfun(@(x) x.getFrameIndex, images);
 			[~,sortIdx] = sort(sortValues);
 			images = images(sortIdx);
 			list.add(images);

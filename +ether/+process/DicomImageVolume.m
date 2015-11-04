@@ -8,9 +8,7 @@ classdef DicomImageVolume < ether.process.ImageVolume & ether.process.Loadable
 
 	properties
 		frameOfReferenceUid = [];
-		patientDob = [];
-		patientId = [];
-		patientName = [];
+		patient = [];
 		studyUid = [];
 		modality = [];
 	end

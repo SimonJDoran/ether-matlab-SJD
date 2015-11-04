@@ -22,18 +22,35 @@ classdef NativeSopInstance < ether.dicom.SopInstance
 		end
 
 		%-------------------------------------------------------------------------
-		function value = get(this, tag)
+		function dump(this)
+			
+		end
+
+		%-------------------------------------------------------------------------
+		function [value,error,message] = getValue(this, tag)
 			value = [];
-			if (~this.isLoaded && this.autoLoad)
+			error = false;
+			message = '';
+			if (~this.isLoaded)
 				this.read;
 			end
 			if ischar(tag)
 				tagName = tag;
 			else
-				tagName = ether.dicom.Tag.nameOf(tag);
+				if isinteger(tag)
+					tagName = ether.dicom.Tag.nameOf(tag);
+				else
+					error = true;
+					message = 'Invalid tag';
+					return;
+				end
 			end
 			if isfield(this.dicomInfo, tagName)
 				value = this.dicomInfo.(tagName);
+			else
+				error = true;
+				[~,label] = ether.dicom.Tag.tagOf(tag);
+				message = sprintf('Field not found: %s %s', tagName, label);
 			end
 		end
 

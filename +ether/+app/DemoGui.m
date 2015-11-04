@@ -134,7 +134,15 @@ classdef DemoGui < ether.app.AbstractGuiApplication
 
 		%-------------------------------------------------------------------------
 		function onDcmSeriesList(this, source, event)
-			event
+			seriesList = getappdata(this.dcmSeriesList, 'SeriesList');
+			if seriesList.isEmpty()
+				return;
+			end
+			series = seriesList.get(source.Value);
+			images = series.getImageList.toArray;
+			arrayfun(@(x) x.dump, images);
+			nativeLoc = arrayfun(@(x) x.getSliceLocation, images)
+			computeLoc = arrayfun(@(x) ether.dicom.Image.location(x.getImagePosition, x.getImageOrientation), images)
 		end
 
 		%-------------------------------------------------------------------------

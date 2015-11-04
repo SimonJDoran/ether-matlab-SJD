@@ -3,10 +3,19 @@ classdef Patient < handle
 	%   A Patient has name, id and birth date, contains zero or more Studies
 
 	%----------------------------------------------------------------------------
+	properties(Constant)
+		HFS = 'HFS';
+		HFP = 'HFP';
+		FFS = 'FFS';
+		FFP = 'FFP';
+	end
+
+	%----------------------------------------------------------------------------
 	properties
 		birthDate;
 		id;
 		name;
+		otherId = '';
 	end
 
 	%----------------------------------------------------------------------------
@@ -19,10 +28,12 @@ classdef Patient < handle
 		%-------------------------------------------------------------------------
 		function key = makeKey(sopInst)
 			import ether.dicom.*;
-			patName = Patient.fixName(sopInst.get(Tag.PatientName));
-			patBirthDate = sopInst.get(Tag.PatientBirthDate);
-			patId = sopInst.get(Tag.PatientID);
-			key = sprintf('%s_%s_%s', strrep(patName, ' ', '_'), patBirthDate, patId);
+			patName = Patient.fixName(sopInst.getValue(Tag.PatientName));
+			da = sopInst.getValue(Tag.PatientBirthDate);
+			patBirthDate = Utils.daToDateVector(da);
+			patId = sopInst.getValue(Tag.PatientID);
+			key = sprintf('%s_%s_%s', strrep(patName, ' ', '_'), ...
+				ether.dicom.Utils.dateToDA(patBirthDate), patId);
 		end
 	end
 

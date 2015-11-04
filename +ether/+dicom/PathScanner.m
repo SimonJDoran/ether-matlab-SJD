@@ -4,11 +4,13 @@ classdef PathScanner < handle
 	
 	%----------------------------------------------------------------------------
 	properties(Constant,Access=private)
-		logger = ether.log4m.Logger.getLogger('ether.dicom.io.PathScanner');
+		logger = ether.log4m.Logger.getLogger('ether.dicom.PathScanner');
 	end
 
 	%----------------------------------------------------------------------------
 	events
+		ScanFinish
+		ScanStart
 		SopInstanceFound
 	end
 
@@ -18,7 +20,9 @@ classdef PathScanner < handle
 		function addPathScanListener(this, listeners)
 			for ii=1:numel(listeners)
 				listener = listeners(ii);
+				this.addlistener('ScanStart', @listener.scanStart);
 				this.addlistener('SopInstanceFound', @listener.sopInstanceFound);
+				this.addlistener('ScanFinish', @listener.scanFinish);
 			end
 		end
 
@@ -41,9 +45,11 @@ classdef PathScanner < handle
 			this.buildFileList(path, fileList, recurse);
 			fileCount = fileList.size;
 			validCount = 0;
+			this.notify('ScanStart', ether.dicom.ScanStartEvent);
 			for ii=1:fileList.size
 				validCount = validCount + this.scanFile(fileList.get(ii).value);
 			end
+			this.notify('ScanFinish', ether.dicom.ScanFinishEvent);
 			elapsed = toc;
 			this.logger.info(...
 				@() sprintf('Scan complete in %.1fs. %d SOP instances found', ...
@@ -82,9 +88,10 @@ classdef PathScanner < handle
 			sopInst = ether.dicom.Toolkit.getToolkit().createSopInstance();
 			[bool,msg] = sopInst.read(file);
 			if bool
-				event = ether.dicom.io.SopInstanceFoundEvent(sopInst);
+				event = ether.dicom.SopInstanceFoundEvent(sopInst);
 				this.notify('SopInstanceFound', event);
 				valid = 1;
+				sopInst.unload;
 			else
 				this.logger.info(@() sprintf('Cannot read %s: %s', file, msg));
 			end

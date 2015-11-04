@@ -1,4 +1,4 @@
-classdef DicomReceiver < ether.dicom.io.PathScanListener
+classdef DicomReceiver < ether.dicom.PathScanListener
 	%DICOMRECEIVER Builds PatientRoot from SopInstances
 	%   Additional PatientRoots created if duplicate SopInstances found 
 
@@ -34,6 +34,16 @@ classdef DicomReceiver < ether.dicom.io.PathScanListener
 			values = this.patientMap.values;
 			root.addPatient([values{:}]);
 			duplicates = {};
+		end
+
+		%-------------------------------------------------------------------------
+		%	Callback method.
+		function scanFinish(~, ~, ~)
+		end
+
+		%-------------------------------------------------------------------------
+		%	Callback method.
+		function scanStart(~, ~, ~)
 		end
 
 		%-------------------------------------------------------------------------

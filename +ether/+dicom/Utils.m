@@ -11,6 +11,10 @@ classdef Utils < handle
 		%-------------------------------------------------------------------------
 		function vec = daToDateVector(da)
 			% Convert DA (date) field to MATLAB datetime array format
+			if isempty(da)
+				vec = zeros(1, 6);
+				return
+			end
 			if ~(ischar(da) && isvector(da) && (numel(da) == 8))
 				throw(MException('Ether:Dicom:daToDateVector', ...
 					'DA element must be 8 characters'));
@@ -22,10 +26,20 @@ classdef Utils < handle
 		function da = dateToDA(date)
 			% Convert MATLAB datetime array format to DA (date) field
 			if ~(isnumeric(date) && isvector(date) && (numel(date) == 6))
-				throw(MException('Ether:Dicom:daToDateVector', ...
-					'DA element must be 8 characters'));
+				throw(MException('Ether:Dicom:dateToDA', ...
+					'date must be 6 numbers'));
 			end
-			da = sprintf('%4i%02i%02i', date(1), date(2), date(3));
+			da = sprintf('%04i%02i%02i', date(1), date(2), date(3));
+		end
+
+		%-------------------------------------------------------------------------
+		function da = dateToInt(date)
+			% Convert MATLAB datetime array format to DA (date) field
+			if ~(isnumeric(date) && isvector(date) && (numel(date) == 6))
+				throw(MException('Ether:Dicom:dateToDA', ...
+					'date must be 6 numbers'));
+			end
+			da = uint32(date(1)*10000+date(2)*100+date(3));
 		end
 
 		%-------------------------------------------------------------------------
