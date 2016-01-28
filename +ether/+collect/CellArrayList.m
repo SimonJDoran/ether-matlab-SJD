@@ -20,10 +20,6 @@ classdef CellArrayList < ether.collect.List
 	methods
 		%-------------------------------------------------------------------------
 		function this = CellArrayList(class)
-			if strcmp(class, 'char')
-				throw(MException('Ether:Collect:List', ...
-					'Incompatible class. Use ether.String instead of class "char"'));
-			end
 			% Construct a new CellArrayList<class>.
 			this@ether.collect.List(class);
 			this.array = cell(ether.collect.CellArrayList.INITIAL_SIZE, 1);
@@ -31,24 +27,50 @@ classdef CellArrayList < ether.collect.List
 		end
 
 		%-------------------------------------------------------------------------
-		function add(this, items)
+		function bool = add(this, items)
+			bool = false;
 			if isempty(items)
 				return;
 			end
-			if ~(all(isa(items, this.class)))
-				me = MException('Ether:List:InvalidClass', ...
-					'Supplied items do not match specified content class for List');
-				throw(me);
+			fCells = iscell(items);
+			if (~fCells)
+				if ~(all(isa(items, this.class)))
+					me = MException('Ether:List:InvalidClass', ...
+						['Supplied items do not match specified content class for List (',...
+						this.class,')']);
+					throw(me);
+				end
+			else
+				if ~(all(cellfun(@(c)isa(c, this.class), items)))
+					me = MException('Ether:List:InvalidClass', ...
+						['Supplied items do not match specified content class for List (',...
+						this.class,')']);
+					throw(me);
+				end
 			end
 			nItems = numel(items);
+			if (~fCells && strcmp(this.class, 'char'))
+				nItems = 1;
+			end
 			if (this.nCell+nItems > this.capacity)
 				this.resize(nItems);
 			end
 			startIdx = this.nCell;
-			for i=1:nItems
-				this.array{startIdx+i} = items(i);
+			if (~fCells)
+				if (strcmp(this.class, 'char'))
+					this.array{startIdx+1} = items;
+				else
+					for i=1:nItems
+						this.array{startIdx+i} = items(i);
+					end
+				end
+			else
+				for i=1:nItems
+					this.array{startIdx+i} = items{i};
+				end
 			end
 			this.nCell = this.nCell + nItems;
+			bool = true;
 		end
 
 		%-------------------------------------------------------------------------
@@ -131,6 +153,10 @@ classdef CellArrayList < ether.collect.List
 
 		%-------------------------------------------------------------------------
 		function items = toArray(this)
+			if strcmp(this.class, 'char')
+				throw(MException('Ether:Collect:List', ...
+					'Cannot create regular array of type "char" without concatenation. Use toCellArray()'));
+			end
 			items = [this.array{1:this.nCell}];
 		end
 

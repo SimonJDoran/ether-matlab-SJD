@@ -10,6 +10,9 @@ classdef (Abstract) DicomDatabase < handle
 		importDirectory(this, path, recurse)
 
 		%-------------------------------------------------------------------------
+		patientRoot = search(this, query)
+
+		%-------------------------------------------------------------------------
 		sopInst = searchInstance(this, uid)
 
 		%-------------------------------------------------------------------------

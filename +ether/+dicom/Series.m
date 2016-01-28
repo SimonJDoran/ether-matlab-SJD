@@ -22,7 +22,7 @@ classdef Series < handle
 		function this = Series(uid)
 			this.instanceUid = uid;
 			this.description = '';
-			this.modality = '';
+			this.modality = ether.dicom.Modality.OT;
 			this.number = 65536;
 			this.studyUid = '';
 			this.time = 0;

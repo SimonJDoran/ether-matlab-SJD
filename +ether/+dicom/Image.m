@@ -29,6 +29,7 @@ classdef Image < handle
 		sliceLocation = [];
 		sliceThickness = NaN;
 		sopInstance;
+		sopInstanceUid;
 		uid;
 		windowCentre = NaN;
 		windowWidth = NaN;
@@ -112,6 +113,17 @@ classdef Image < handle
 				this.columns = this.sopInstance.getValue(ether.dicom.Tag.Columns);
 			end
 			columns = this.columns;
+		end
+
+		%-------------------------------------------------------------------------
+		function floatData = getFloatPixelData(this)
+			floatData = this.getPixelData();
+			ri = this.getRescaleIntercept();
+			rs = this.getRescaleSlope();
+			ss = this.getScaleSlope();
+			if ((ri ~= 0.0) || (rs ~= 1.0) || (ss ~= 1.0))
+				floatData = (floatData.*rs+ri)./(rs*ss);
+			end
 		end
 
 		%-------------------------------------------------------------------------
@@ -265,6 +277,11 @@ classdef Image < handle
 		end
 
 		%-------------------------------------------------------------------------
+		function uid = getSeriesUid(this)
+			uid = this.sopInstance.getValue(ether.dicom.Tag.SeriesInstanceUID);
+		end
+
+		%-------------------------------------------------------------------------
 		function sliceLocation = getSliceLocation(this)
 			if isempty(this.sliceLocation)
 				this.sliceLocation = this.sopInstance.getValue(...
@@ -286,6 +303,15 @@ classdef Image < handle
 					ether.dicom.Tag.SliceThickness);
 			end
 			sliceThickness = this.sliceThickness;
+		end
+
+		%-------------------------------------------------------------------------
+		function uid = getSopInstanceUid(this)
+			if (isempty(this.sopInstanceUid))
+				this.sopInstanceUid = this.sopInstance.getValue(...
+					ether.dicom.Tag.SOPInstanceUID);
+			end
+			uid = this.sopInstanceUid;
 		end
 
 		%-------------------------------------------------------------------------

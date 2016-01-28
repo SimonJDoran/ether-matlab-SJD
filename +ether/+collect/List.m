@@ -6,6 +6,13 @@ classdef List < handle
 	end
 
 	%----------------------------------------------------------------------------
+	methods(Static)
+		function uList = unmodifiable(list)
+			uList = ether.collect.UnmodifiableList(list);
+		end
+	end
+
+	%----------------------------------------------------------------------------
 	%	Public abstract methods
 	methods(Abstract)
 		% Insert items into the List
@@ -61,12 +68,19 @@ classdef List < handle
 			this.class = class;
 		end
 
-		%-------------------------------------------------------------------------
+		% Add all elements of supplied list to this List.
+		%
+		% Returns true if elements successfully added, false otherwise.
 		function bool = addAll(this, list)
-			% Add all elements of supplied list to this List.
-			%
-			% Returns true if elements successfully added, false otherwise.
-			bool = this.add(list.toArray);
+			if (isempty(list) || ~isa(list, 'ether.collect.List'))
+				bool = false;
+			else
+				if (strcmp(this.class, 'char'))
+					bool = this.add(list.toCellArray());
+				else
+					bool = this.add(list.toArray());
+				end
+			end
 		end
 
 		% Return type of List

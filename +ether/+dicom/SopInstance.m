@@ -33,15 +33,23 @@ classdef SopInstance < handle
 		%   Too expensive to use as display()
 
 		%-------------------------------------------------------------------------
+		dcm = getDicomObject(this)
+		% Returns DicomObject contained in this SOP instance
+
+		%-------------------------------------------------------------------------
+		[item,error,message] = getSequenceItem(this, seqPath, idx)
+		% Returns the item at index idx for the SQ given by seqPath
+
+		%-------------------------------------------------------------------------
 		[value,error,message] = getSequenceItemCount(this, seqPath)
-			% Returns the item count for the SQ given by seqPath
-			%   seqPath must be pairs of (sequence tag,index) finishing with an SQ tag
+		% Returns the item count for the SQ given by seqPath
+		%   seqPath must be pairs of (sequence tag,index) finishing with an SQ tag
 
 		%-------------------------------------------------------------------------
 		[value,error,message] = getSequenceValue(this, seqPath, tag)
-			% Returns the item count for the SQ given by seqPath
-			%   seqPath must be even length integer array consisting of pairs of
-			%   (SQ tag,index)
+		% Returns the value for the SQ item given by seqPath
+		%   seqPath must be even length integer array consisting of pairs of
+		%   (SQ tag,index)
 
 		%-------------------------------------------------------------------------
 		[value,error,message] = getValue(this, tag)

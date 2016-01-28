@@ -1,14 +1,10 @@
-classdef JavaDicom
+classdef JavaDicom < ether.dicom.DicomObject
 	%JAVADICOM Wrapper for org.dcm4che2.data.DicomObject
 	%   Detailed explanation goes here
 	
 	%----------------------------------------------------------------------------
-	properties(SetAccess=private)
+	properties(Access=protected)
 		jDcm;
-	end
-
-	%----------------------------------------------------------------------------
-	properties(Access=private)
 		jSharedSq;
 		frameItemMap;
 	end
@@ -16,12 +12,24 @@ classdef JavaDicom
 	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
-		function [value,error,message] = getSequenceItemCount(this, seqPath)
-			% Returns the item count for the SQ given by seqPath
-			%   seqPath must be pairs of (sequence tag,index) finishing with an SQ tag
+		function dcm = getRawDicomObject(this)
+			dcm = this.jDcm;
+		end
+
+		%-------------------------------------------------------------------------
+		function [item,error,message] = getSequenceItem(this, seqPath, idx)
 			if (isvector(seqPath) && isinteger(seqPath) && ...
 				  (mod(size(seqPath, 2), 2) == 1))
-				[value,error,message] = this.getSequenceItemCount(seqPath);
+				[item,error,message] = this.getSequenceItemImpl(seqPath, idx);
+				return;
+			end
+		end
+
+		%-------------------------------------------------------------------------
+		function [value,error,message] = getSequenceItemCount(this, seqPath)
+			if (isvector(seqPath) && isinteger(seqPath) && ...
+				  (mod(size(seqPath, 2), 2) == 1))
+				[value,error,message] = this.getSequenceItemCountImpl(seqPath);
 				return;
 			end
 			% TODO: Check seqPath is cell array that can be converted to uint32s
@@ -33,8 +41,6 @@ classdef JavaDicom
 
 		%-------------------------------------------------------------------------
 		function [value,error,message] = getSequenceValue(this, seqPath, tag)
-			% Returns the item count for the SQ given by seqPath
-			%   seqPath must be pairs of (sequence tag,index)
 			if (isvector(seqPath) && isinteger(seqPath) && ...
 				  (mod(size(seqPath, 2), 2) == 0) && isinteger(tag))
 				[value,error,message] = this.getSequenceValueImpl(seqPath, tag);
@@ -90,6 +96,56 @@ classdef JavaDicom
 				if(isa(ex, 'matlab.exception.JavaException'))
 					message = ex.errMsg;
 					ex.printStackTrace;
+				else
+					throw(ex);
+				end
+			end
+		end
+
+		%-------------------------------------------------------------------------
+		function [item,error,message] = getSequenceItemImpl(this, seqPath, idx)
+			import ether.dicom.*;
+			item = [];
+			error = true;
+			message = '';
+			try
+				switch seqPath(1)
+					% Per-frame functional group for multiframe
+					case Tag.PerFrameFunctionalGroupsSequence
+						frameIdx = seqPath(2);
+						if this.frameItemMap.isKey(frameIdx)
+							jDicom = this.frameItemMap(frameIdx);
+						else
+							jDicom = henson.Henson.getSequenceObject(this.jDcm, ...
+								seqPath(1:2));
+							if isempty(jDicom)
+								message = sprintf('No item in SQ %08x at index %i', ...
+									seqPath(1), frameIndex);
+								return;
+							end
+							this.frameItemMap(frameIdx) = jDicom;
+						end
+						finalPath = [seqPath(3:end),idx];
+
+					% General case of a SQ
+					otherwise
+						jDicom = this.jDcm;
+						finalPath = [seqPath,idx];
+				end
+				% Fetch the final item and value
+				jItemDcm = henson.Henson.getSequenceObject(jDicom, finalPath);
+				if isempty(jItemDcm)
+					message = 'No item found';
+					return;
+				end
+				item = JavaDicom(jItemDcm);
+				error = false;
+			catch ex
+				if(isa(ex, 'matlab.exception.JavaException'))
+					message = ex.message;
+					if isjava(ex.ExceptionObject)
+						ex.ExceptionObject.printStackTrace;
+					end
 				else
 					throw(ex);
 				end

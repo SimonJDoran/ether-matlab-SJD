@@ -10,6 +10,10 @@ classdef XmlParser < handle
 	properties(Constant,Access=private)
 		AIM_V4_0 = 'AIMv4_0';
 		ATTR_AIM_VERSION = 'aimVersion';
+		ATTR_CODE = 'code';
+		ATTR_CODE_SYSTEM = 'codeSystem';
+		ATTR_CODE_SYSTEM_NAME = 'codeSystemName';
+		ATTR_CODE_SYSTEM_VERSION = 'codeSystemVersion';
 		ATTR_ROOT = 'root';
 		ATTR_VALUE = 'value';
 		ATTR_XSI_TYPE = 'xsi:type';
@@ -300,7 +304,7 @@ classdef XmlParser < handle
 				return;
 			end
 
-			study = ether.aim.ImageStudy();
+			study = ImageStudy();
 			childNodes = studyNode.getChildNodes();
 			for i=0:childNodes.getLength-1
 				node = childNodes.item(i);
@@ -339,7 +343,7 @@ classdef XmlParser < handle
 				return;
 			end
 
-			series = ether.aim.ImageSeries();
+			series = ImageSeries();
 			childNodes = seriesNode.getChildNodes();
 			for i=0:childNodes.getLength-1
 				node = childNodes.item(i);
@@ -351,7 +355,15 @@ classdef XmlParser < handle
 						series.instanceUid = Xml.getAttrStr(...
 							node.getAttributes(), XmlParser.ATTR_ROOT);
 
-%					case XmlParser.NODE_MODALITY
+					case XmlParser.NODE_MODALITY
+						series.modality.code = Xml.getAttrStr(...
+							node.getAttributes(), XmlParser.ATTR_CODE, '');
+						series.modality.codeSystem = Xml.getAttrStr(...
+							node.getAttributes(), XmlParser.ATTR_CODE_SYSTEM, '');
+						series.modality.codeSystemName = Xml.getAttrStr(...
+							node.getAttributes(), XmlParser.ATTR_CODE_SYSTEM_NAME, '');
+						series.modality.codeSystemVersion = Xml.getAttrStr(...
+							node.getAttributes(), XmlParser.ATTR_CODE_SYSTEM_VERSION, '');
 
 					case XmlParser.NODE_IMAGE_COLLECTION
 						images = node.getChildNodes;

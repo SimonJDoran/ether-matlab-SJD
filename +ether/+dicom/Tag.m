@@ -72,6 +72,25 @@ classdef Tag
 		ScaleIntercept = uint32(hex2dec('2005100d'));
 		ScaleSlope = uint32(hex2dec('2005100e'));
 
+		%{ Group 0x3006 }%
+		StructureSetLabel = uint32(hex2dec('30060002'));
+		StructureSetName = uint32(hex2dec('30060004'));
+		StructureSetDate = uint32(hex2dec('30060008'));
+		StructureSetTime = uint32(hex2dec('30060009'));
+		ContourImageSequence = uint32(hex2dec('30060016'));
+		StructureSetRoiSequence = uint32(hex2dec('30060020'));
+		RoiNumber = uint32(hex2dec('30060022'));
+		ReferencedFrameOfReferenceUid = uint32(hex2dec('30060024'));
+		RoiName = uint32(hex2dec('30060026'));
+		RoiDisplayColour = uint32(hex2dec('3006002a'));
+		RoiGenerationAlgorithm = uint32(hex2dec('30060036'));
+		RoiContourSequence = uint32(hex2dec('30060039'));
+		ContourSequence = uint32(hex2dec('30060040'));
+		ContourGeometricType = uint32(hex2dec('30060042'));
+		NumberOfContourPoints = uint32(hex2dec('30060046'));
+		ContourNumber = uint32(hex2dec('30060048'));
+		ContourData = uint32(hex2dec('30060050'));
+
 		%{ Group 0x5200 }%
 		SharedFunctionalGroupsSequence = uint32(hex2dec('52009229'));
 		PerFrameFunctionalGroupsSequence = uint32(hex2dec('52009230'));

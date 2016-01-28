@@ -10,7 +10,12 @@ classdef (Abstract) AnnotationCollection < handle
 		user = [];
 	end
 	
-	methods
+	methods(Abstract)
+		bool = addAnnotation(this, annotation);
+		annotations = getAllAnnotations(this)
+		annotation = getAnnotation(this, uid);
+		count = getAnnotationCount(this);
+		annotation = removeAnnotation(this, uid);
 	end
 	
 end

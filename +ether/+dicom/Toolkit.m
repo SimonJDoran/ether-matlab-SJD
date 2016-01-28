@@ -24,6 +24,7 @@ classdef Toolkit < handle
 		imageUidMap;
 		javaOk = true;
 		javaTested = false;
+		jToolkit = [];
 	end
 
 	%----------------------------------------------------------------------------
@@ -63,18 +64,22 @@ classdef Toolkit < handle
 				throw(MException('Ether:DICOM:Toolkit', 'Not a valid SOP instance'));
 			end
 			nImages = sopInst.numberOfFrames;
-			if nImages > 0
-				if nImages == 1
+			sopClassUid = sopInst.sopClassUid;
+			switch sopClassUid
+				case UID.CTImageStorage
+					images = CTImage(sopInst, 1);
+
+				case UID.MRImageStorage
 					images = MRImage(sopInst, 1);
-				else
+
+				case UID.EnhancedMRImageStorage
 					images = EnhancedMRImage.empty(nImages, 0);
-					% TODO: Create images based on SOP Class UID of sopInst
-					for ii=1:nImages
-						images(ii) = EnhancedMRImage(sopInst, ii);
+					for i=1:nImages
+						images(i) = EnhancedMRImage(sopInst, i);
 					end
-				end
-			else
-				images = [];
+
+				otherwise
+					images = [];
 			end
 		end
 
@@ -104,6 +109,23 @@ classdef Toolkit < handle
 		end
 
 		%-------------------------------------------------------------------------
+		function rtStruct = createRtStruct(this, arg)
+			jRtStruct = [];
+			if (isa(arg, 'ether.dicom.SopInstance') || ...
+				 isa(arg, 'etherj.dicom.SopInstance'))
+				jRtStruct = this.jToolkit.createRtStruct(arg.getDicomObject());
+			else
+				if (isa(arg, 'org.dcm4che2.data.DicomObject'))
+					jRtStruct = this.jToolkit.createRtStruct(arg);
+				end
+			end
+			if (isempty(jRtStruct))
+				throw(MException('Ether:DICOM:Toolkit', 'Invalid argument supplied'));
+			end
+			rtStruct = ether.dicom.RtStruct(jRtStruct);
+		end
+
+		%-------------------------------------------------------------------------
 		function series = createSeries(~, arg)
 			import ether.dicom.*;
 			if ~isa(arg, 'ether.dicom.SopInstance')
@@ -125,14 +147,22 @@ classdef Toolkit < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function sopInst = createSopInstance(this)
-			if ~this.javaTested
-				this.testJava();
-			end
-			if this.useJava && this.javaOk
-				sopInst = ether.dicom.JavaSopInstance();
-			else
-				sopInst = ether.dicom.NativeSopInstance();
+		function sopInst = createSopInstance(this, filename, etherDcm)
+			import ether.dicom.*;
+			switch nargin
+				case 1
+					sopInst = JavaSopInstance();
+					return;
+
+				case 2
+					sopInst = JavaSopInstance(filename);
+					return;
+
+				case 3
+					sopInst = JavaSopInstance(filename, etherDcm);
+					return;
+
+				otherwise
 			end
 		end
 
@@ -179,9 +209,7 @@ classdef Toolkit < handle
 		%-------------------------------------------------------------------------
 		function this = Toolkit()
 			this.imageUidMap = [];
-			this.useJava = true;
-			this.javaOk = true;
-			this.javaTested = false;
+			this.jToolkit = etherj.dicom.DicomToolkit.getToolkit();
 		end
 
 		%-------------------------------------------------------------------------
@@ -192,24 +220,6 @@ classdef Toolkit < handle
 			map(UID.EnhancedMRImageStorage) = [];
 			map(UID.CTImageStorage) = [];
 			map(UID.EnhancedCTImageStorage) = [];
-		end
-
-		%-------------------------------------------------------------------------
-		function testJava(this)
-			try
-				testObject = javaObject('henson.DicomIoHandler');
-				this.javaOk = isjava(testObject);
-			catch ex
-				this.javaOk = false;
-				this.logger.warn(@() ...
-					sprintf('Exception: %s', ether.formatException(ex)));
-			end
-			this.javaTested = true;
-			if this.javaOk
-				this.logger.info('Java components of ether.dicom available');
-			else
-				this.logger.info('Java components of ether.dicom NOT available');
-			end
 		end
 
 	end

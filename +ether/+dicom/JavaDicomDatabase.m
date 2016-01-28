@@ -30,6 +30,11 @@ classdef JavaDicomDatabase < ether.dicom.DicomDatabase
 		end
 
 		%-------------------------------------------------------------------------
+		function patientRoot = search(this, query)
+			patientRoot = this.jdb.search(query);
+		end
+
+		%-------------------------------------------------------------------------
 		function sopInst = searchInstance(this, uid)
 			jSopInst = this.jdb.searchInstance(uid);
 			sopInst = ether.dicom.Toolkit.getToolkit().createSopInstance();
@@ -45,7 +50,16 @@ classdef JavaDicomDatabase < ether.dicom.DicomDatabase
 
 		%-------------------------------------------------------------------------
 		function storeInstance(this, sopInst)
-			throw(MException('Ether:DICOM:Database', 'Unsupported operation'));
+			jSopInst = etherj.dicom.Toolkit.getToolkit().createSopIsntance(...
+				sopInst.filename);
+			jSopInst.setSopClassUid(sopInst.sopClassUid);
+			jSopInst.setNumberOfFrames(sopInst.numberOfFrames);
+			jSopInst.setUid(sopInst.instanceUid);
+			jSopInst.setInstanceNumber(sopInst.instanceNumber);
+			jSopInst.setModality(sopInst.modality);
+			jSopInst.setSeriesUid(sopInst.seriesUid);
+			jSopInst.setStudyUid(sopInst.sturyUid);
+			this.jdb.storeInstance(jSopInst);
 		end
 
 		%-------------------------------------------------------------------------

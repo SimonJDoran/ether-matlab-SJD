@@ -49,6 +49,11 @@ classdef ImageAnnotationCollection < ether.aim.AnnotationCollection
 		end
 
 		%-------------------------------------------------------------------------
+		function count = getAnnotationCount(this)
+			count = this.annotations.size();
+		end
+
+		%-------------------------------------------------------------------------
 		function annotation = removeAnnotation(this, uid)
 			annotation = [];
 			if ~this.annotations.isKey(uid)

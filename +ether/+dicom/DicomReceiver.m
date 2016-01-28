@@ -4,7 +4,7 @@ classdef DicomReceiver < ether.dicom.PathScanListener
 
 	%----------------------------------------------------------------------------
 	properties(Constant,Access=private)
-		logger = ether.log4m.Logger.getLogger('ether.dicom.io.DicomReceiver');
+		logger = ether.log4m.Logger.getLogger('ether.dicom.DicomReceiver');
 	end
 
 	%----------------------------------------------------------------------------
@@ -12,6 +12,7 @@ classdef DicomReceiver < ether.dicom.PathScanListener
 		patientMap;
 		sopInstMap;
 		duplicates;
+		toolkit;
 	end
 
 	%----------------------------------------------------------------------------
@@ -20,6 +21,7 @@ classdef DicomReceiver < ether.dicom.PathScanListener
 		function this = DicomReceiver()
 			this.patientMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 			this.duplicates = {};
+			this.toolkit = ether.dicom.Toolkit.getToolkit();
 		end
 
 		%-------------------------------------------------------------------------
@@ -134,7 +136,6 @@ classdef DicomReceiver < ether.dicom.PathScanListener
 
 		%-------------------------------------------------------------------------
 		function processSopInst(this, sopInst)
-			toolkit = ether.dicom.Toolkit.getToolkit();
 			patient = this.findPatient(this.patientMap, sopInst, toolkit);
 			study = this.findStudy(patient, sopInst, toolkit);
 			series = this.findSeries(study, sopInst, toolkit);
