@@ -3,19 +3,16 @@ classdef Patient < handle
 	%   A Patient has name, id and birth date, contains zero or more Studies
 
 	%----------------------------------------------------------------------------
-	properties(Constant)
-		HFS = 'HFS';
-		HFP = 'HFP';
-		FFS = 'FFS';
-		FFP = 'FFP';
-	end
-
-	%----------------------------------------------------------------------------
 	properties
 		birthDate;
 		id;
 		name;
 		otherId = '';
+	end
+
+	%----------------------------------------------------------------------------
+	properties(SetAccess=private)
+		Study;
 	end
 
 	%----------------------------------------------------------------------------
@@ -74,9 +71,23 @@ classdef Patient < handle
 		end
 
 		%-------------------------------------------------------------------------
+		function array = getAllStudies(this)
+			values = this.studyMap.values;
+			studies = [values{:}];
+			sortValues = arrayfun(@(x) datenum(x.date), studies);
+			[~,sortIdx] = sort(sortValues);
+			array = studies(sortIdx);
+		end
+
+		%-------------------------------------------------------------------------
 		function key = getKey(this)
 			key = sprintf('%s_%s_%s', strrep(this.name, ' ', '_'), ...
 				ether.dicom.Utils.dateToDA(this.birthDate), this.id);
+		end
+
+		%-------------------------------------------------------------------------
+		function study = get.Study(this)
+			study = this.getAllStudies();
 		end
 
 		%-------------------------------------------------------------------------
@@ -90,12 +101,7 @@ classdef Patient < handle
 		%-------------------------------------------------------------------------
 		function list = getStudyList(this, orderBy)
 			list = ether.collect.CellArrayList('ether.dicom.Study');
-			values = this.studyMap.values;
-			studies = [values{:}];
-			sortValues = arrayfun(@(x) datenum(x.date), studies);
-			[~,sortIdx] = sort(sortValues);
-			studies = studies(sortIdx);
-			list.add(studies);
+			list.add(this.getAllStudies());
 		end
 
 		%-------------------------------------------------------------------------

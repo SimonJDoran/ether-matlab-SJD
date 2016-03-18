@@ -6,6 +6,11 @@ classdef PatientRoot < handle
 		logger = ether.log4m.Logger.getLogger('ether.dicom.PatientRoot');
 	end
 
+	%----------------------------------------------------------------------------
+	properties(SetAccess=private)
+		Patient;
+	end
+
 	properties(Access=private)
 		patientMap;
 	end
@@ -30,6 +35,20 @@ classdef PatientRoot < handle
 		end
 
 		%-------------------------------------------------------------------------
+		function array = getAllPatients(this)
+			values = this.patientMap.values;
+			patients = [values{:}];
+			sortValues = arrayfun(@(x) x.name, patients, 'UniformOutput', false);
+			[~,sortIdx] = sort(sortValues);
+			array = patients(sortIdx);
+		end
+
+		%-------------------------------------------------------------------------
+		function patient = get.Patient(this)
+			patient = this.getAllPatients();
+		end
+
+		%-------------------------------------------------------------------------
 		function patient = getPatient(this, key)
 			patient = [];
 			keyIdx = this.patientMap.isKey(key);
@@ -46,12 +65,7 @@ classdef PatientRoot < handle
 		%-------------------------------------------------------------------------
 		function list = getPatientList(this, orderBy)
 			list = ether.collect.CellArrayList('ether.dicom.Patient');
-			values = this.patientMap.values;
-			patients = [values{:}];
-			sortValues = arrayfun(@(x) x.name, patients, 'UniformOutput', false);
-			[~,sortIdx] = sort(sortValues);
-			patients = patients(sortIdx);
-			list.add(patients);
+			list.add(this.getAllPatients());
 		end
 
 		%-------------------------------------------------------------------------

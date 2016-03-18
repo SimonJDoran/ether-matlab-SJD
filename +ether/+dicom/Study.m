@@ -3,6 +3,7 @@ classdef Study < handle
 	%   A Study has a UID and contains zero or more Series. Each Study belongs to
 	%   a Patient.
 
+	%----------------------------------------------------------------------------
 	properties
 		accession;
 		date;
@@ -11,6 +12,12 @@ classdef Study < handle
 		instanceUid;
 	end
 
+	%----------------------------------------------------------------------------
+	properties(SetAccess=private)
+		Series;
+	end
+
+	%----------------------------------------------------------------------------
 	properties(Access=private)
 		seriesMap;
 	end
@@ -36,6 +43,20 @@ classdef Study < handle
 		end
 
 		%-------------------------------------------------------------------------
+		function series = get.Series(this)
+			series = this.getAllSeries();
+		end
+
+		%-------------------------------------------------------------------------
+		function array = getAllSeries(this)
+			values = this.seriesMap.values;
+			series = [values{:}];
+			sortValues = arrayfun(@(x) x.number, series);
+			[~,sortIdx] = sort(sortValues);
+			array = series(sortIdx);
+		end
+
+		%-------------------------------------------------------------------------
 		function series = getSeries(this, uid)
 			series = [];
 			if this.seriesMap.isKey(uid)
@@ -46,12 +67,7 @@ classdef Study < handle
 		%-------------------------------------------------------------------------
 		function list = getSeriesList(this)
 			list = ether.collect.CellArrayList('ether.dicom.Series');
-			values = this.seriesMap.values;
-			series = [values{:}];
-			sortValues = arrayfun(@(x) x.number, series);
-			[~,sortIdx] = sort(sortValues);
-			series = series(sortIdx);
-			list.add(series);
+			list.add(this.getAllSeries());
 		end
 
 		%-------------------------------------------------------------------------

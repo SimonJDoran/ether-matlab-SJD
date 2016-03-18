@@ -84,7 +84,11 @@ classdef Toolkit < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function root = createPatientRoot(~)
+		function root = createPatientRoot(this, arg)
+			if ((nargin == 2) && (isa(arg, 'etherj.dicom.PatientRoot')))
+				root = this.processPatientRoot(arg);
+				return;
+			end
 			root = ether.dicom.PatientRoot();
 		end
 
@@ -210,6 +214,65 @@ classdef Toolkit < handle
 		function this = Toolkit()
 			this.imageUidMap = [];
 			this.jToolkit = etherj.dicom.DicomToolkit.getToolkit();
+		end
+
+		%-------------------------------------------------------------------------
+		function patient = processPatient(this, jPatient)
+			import ether.dicom.*;
+			jStudyList = jPatient.getStudyList();
+			nStudies = jStudyList.size();
+			% Patient exists, must have at least one study with one series
+			jSopInst = jStudyList.get(0).getSeriesList().get(0).getSopInstanceList().get(0);
+			dcm = this.createSopInstance(char(jSopInst.getPath()), ...
+				JavaDicom(jSopInst.getDicomObject()));
+			patient = this.createPatient(dcm);
+			for i=0:nStudies-1
+				patient.addStudy(this.processStudy(jStudyList.get(i)));
+			end
+		end
+
+		%-------------------------------------------------------------------------
+		function root = processPatientRoot(this, jRoot)
+			import ether.dicom.*;
+			root = PatientRoot();
+			jPatList = jRoot.getPatientList();
+			nPatients = jPatList.size();
+			for i=0:nPatients-1
+				root.addPatient(this.processPatient(jPatList.get(i)));
+			end
+		end
+
+		%-------------------------------------------------------------------------
+		function series = processSeries(this, jSeries)
+			import ether.dicom.*;
+			jSopInstList = jSeries.getSopInstanceList();
+			nSopInst = jSopInstList.size();
+			% Series exists, must have at least one SOP instance
+			jSopInst = jSopInstList.get(0);
+			dcm = this.createSopInstance(char(jSopInst.getPath()), ...
+				JavaDicom(jSopInst.getDicomObject()));
+			series = this.createSeries(dcm);
+			for i=0:nSopInst-1
+				jSopInst = jSopInstList.get(0);
+				dcm = this.createSopInstance(char(jSopInst.getPath()), ...
+					JavaDicom(jSopInst.getDicomObject()));
+				series.addSopInstance(dcm, this);
+			end
+		end
+
+		%-------------------------------------------------------------------------
+		function study = processStudy(this, jStudy)
+			import ether.dicom.*;
+			jSeriesList = jStudy.getSeriesList();
+			nSeries = jSeriesList.size();
+			% Study exists, must have at least one series
+			jSopInst = jSeriesList.get(0).getSopInstanceList().get(0);
+			dcm = this.createSopInstance(char(jSopInst.getPath()), ...
+				JavaDicom(jSopInst.getDicomObject()));
+			study = this.createStudy(dcm);
+			for i=0:nSeries-1
+				study.addSeries(this.processSeries(jSeriesList.get(i)));
+			end
 		end
 
 		%-------------------------------------------------------------------------

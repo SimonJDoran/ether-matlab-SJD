@@ -6,7 +6,7 @@ classdef MRImage < ether.dicom.Image
 		logger = ether.log4m.Logger.getLogger('ether.dicom.MRImage');
 	end
 
-	properties(Access=protected)
+	properties(SetAccess=protected)
 		echoTime = NaN;
 		flipAngle = NaN;
 		inversionTime = NaN;

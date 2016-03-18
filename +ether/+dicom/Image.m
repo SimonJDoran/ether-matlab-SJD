@@ -9,7 +9,7 @@ classdef Image < handle
 	properties
 	end
 
-	properties(Access=protected)
+	properties(SetAccess=protected)
 		columns = [];
 		frame;
 		frameOfReferenceUid = [];

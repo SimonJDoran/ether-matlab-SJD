@@ -50,7 +50,7 @@ classdef JavaDicomDatabase < ether.dicom.DicomDatabase
 
 		%-------------------------------------------------------------------------
 		function storeInstance(this, sopInst)
-			jSopInst = etherj.dicom.Toolkit.getToolkit().createSopIsntance(...
+			jSopInst = etherj.dicom.Toolkit.getToolkit().createSopInstance(...
 				sopInst.filename);
 			jSopInst.setSopClassUid(sopInst.sopClassUid);
 			jSopInst.setNumberOfFrames(sopInst.numberOfFrames);

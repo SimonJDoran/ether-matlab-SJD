@@ -3,6 +3,7 @@ classdef Series < handle
 	%   A Series has a UID, a modality and contains zero or more SopInstances and
 	%   zero or more Images. Each Series belongs to a Study.
 
+	%----------------------------------------------------------------------------
 	properties
 		description;
 		instanceUid;
@@ -12,6 +13,13 @@ classdef Series < handle
 		time;
 	end
 
+	%----------------------------------------------------------------------------
+	properties(SetAccess=private)
+		Image;
+		SopInstance;
+	end
+
+	%----------------------------------------------------------------------------
 	properties(Access=private)
 		sopInstMap;
 		imageMap;
@@ -48,6 +56,34 @@ classdef Series < handle
 		end
 
 		%-------------------------------------------------------------------------
+		function image = get.Image(this)
+			image = this.getAllImages();
+		end
+
+		%-------------------------------------------------------------------------
+		function sopInst = get.SopInstance(this)
+			sopInst = this.getAllSopInstances();
+		end
+
+		%-------------------------------------------------------------------------
+		function array = getAllImages(this)
+			values = this.imageMap.values;
+			array = [values{:}];
+			sortValues = arrayfun(@(x) x.getFrameIndex, array);
+			[~,sortIdx] = sort(sortValues);
+			array = array(sortIdx);
+		end
+
+		%-------------------------------------------------------------------------
+		function array = getAllSopInstances(this)
+			values = this.sopInstMap.values;
+			array = [values{:}];
+			sortValues = arrayfun(@(x) x.instanceNumber, array);
+			[~,sortIdx] = sort(sortValues);
+			array = array(sortIdx);
+		end
+
+		%-------------------------------------------------------------------------
 		function image = getImage(this, uid)
 			image = [];
 			if this.imageMap.isKey(uid)
@@ -63,12 +99,7 @@ classdef Series < handle
 		%-------------------------------------------------------------------------
 		function list = getImageList(this, orderBy)
 			list = ether.collect.CellArrayList('ether.dicom.Image');
-			values = this.imageMap.values;
-			images = [values{:}];
-			sortValues = arrayfun(@(x) x.getFrameIndex, images);
-			[~,sortIdx] = sort(sortValues);
-			images = images(sortIdx);
-			list.add(images);
+			list.add(this.getAllImages());
 		end
 
 		%-------------------------------------------------------------------------
@@ -87,12 +118,7 @@ classdef Series < handle
 		%-------------------------------------------------------------------------
 		function list = getSopInstanceList(this, orderBy)
 			list = ether.collect.CellArrayList('ether.dicom.SopInstance');
-			values = this.sopInstMap.values;
-			instances = [values{:}];
-			sortValues = arrayfun(@(x) x.instanceNumber, instances);
-			[~,sortIdx] = sort(sortValues);
-			instances = instances(sortIdx);
-			list.add(instances);
+			list.add(this.getAllSopInstances());
 		end
 
 		%-------------------------------------------------------------------------
