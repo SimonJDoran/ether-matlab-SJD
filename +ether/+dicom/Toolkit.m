@@ -86,10 +86,10 @@ classdef Toolkit < handle
 		%-------------------------------------------------------------------------
 		function root = createPatientRoot(this, arg)
 			if ((nargin == 2) && (isa(arg, 'etherj.dicom.PatientRoot')))
-				root = this.processPatientRoot(arg);
+				root = ether.dicom.PatientRoot(arg);
 				return;
 			end
-			root = ether.dicom.PatientRoot();
+			root = ether.dicom.PatientRoot(this.jToolkit.createPatientRoot());
 		end
 
 		%-------------------------------------------------------------------------
@@ -130,8 +130,12 @@ classdef Toolkit < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function series = createSeries(~, arg)
+		function series = createSeries(this, arg)
 			import ether.dicom.*;
+			if isa(arg, 'etherj.dicom.Series')
+				series = this.processSeries(arg);
+				return;
+			end
 			if ~isa(arg, 'ether.dicom.SopInstance')
 				% arg should be UID
 				series = ether.dicom.Series(arg);
@@ -253,7 +257,7 @@ classdef Toolkit < handle
 				JavaDicom(jSopInst.getDicomObject()));
 			series = this.createSeries(dcm);
 			for i=0:nSopInst-1
-				jSopInst = jSopInstList.get(0);
+				jSopInst = jSopInstList.get(i);
 				dcm = this.createSopInstance(char(jSopInst.getPath()), ...
 					JavaDicom(jSopInst.getDicomObject()));
 				series.addSopInstance(dcm, this);

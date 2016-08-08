@@ -90,7 +90,8 @@ classdef JavaDicom < ether.dicom.DicomObject
 			error = true;
 			message = '';
 			try
-				value = henson.Henson.getSequenceItemCount(this.jDcm, seqPath);
+				value = etherj.dicom.DicomUtils.getSequenceItemCount(this.jDcm, ...
+					seqPath);
 				error = false;
 			catch ex
 				if(isa(ex, 'matlab.exception.JavaException'))
@@ -116,8 +117,8 @@ classdef JavaDicom < ether.dicom.DicomObject
 						if this.frameItemMap.isKey(frameIdx)
 							jDicom = this.frameItemMap(frameIdx);
 						else
-							jDicom = henson.Henson.getSequenceObject(this.jDcm, ...
-								seqPath(1:2));
+							jDicom = etherj.dicom.DicomUtils.getSequenceObject(...
+								this.jDcm, seqPath(1:2));
 							if isempty(jDicom)
 								message = sprintf('No item in SQ %08x at index %i', ...
 									seqPath(1), frameIndex);
@@ -133,7 +134,8 @@ classdef JavaDicom < ether.dicom.DicomObject
 						finalPath = [seqPath,idx];
 				end
 				% Fetch the final item and value
-				jItemDcm = henson.Henson.getSequenceObject(jDicom, finalPath);
+				jItemDcm = etherj.dicom.DicomUtils.getSequenceObject(jDicom, ...
+					finalPath);
 				if isempty(jItemDcm)
 					message = 'No item found';
 					return;
@@ -165,8 +167,8 @@ classdef JavaDicom < ether.dicom.DicomObject
 						if this.frameItemMap.isKey(frameIdx)
 							jDicom = this.frameItemMap(frameIdx);
 						else
-							jDicom = henson.Henson.getSequenceObject(this.jDcm, ...
-								seqPath(1:2));
+							jDicom = etherj.dicom.DicomUtils.getSequenceObject(...
+								this.jDcm, seqPath(1:2));
 							if isempty(jDicom)
 								message = sprintf('No item in SQ %08x at index %i', ...
 									seqPath(1), frameIndex);
@@ -182,7 +184,8 @@ classdef JavaDicom < ether.dicom.DicomObject
 						finalPath = seqPath;
 				end
 				% Fetch the final item and value
-				jItemDcm = henson.Henson.getSequenceObject(jDicom, finalPath);
+				jItemDcm = etherj.dicom.DicomUtils.getSequenceObject(jDicom, ...
+					finalPath);
 				if isempty(jItemDcm)
 					message = 'No item found';
 					return;
@@ -339,7 +342,7 @@ classdef JavaDicom < ether.dicom.DicomObject
 			vr = '';
 			message = '';
 			try
-				vr = char(henson.Henson.getVr(jDicom, tag));
+				vr = char(etherj.dicom.DicomUtils.getVr(jDicom, tag));
 				error = isempty(vr);
 			catch ex
 				error = true;

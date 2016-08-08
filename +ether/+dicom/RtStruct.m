@@ -13,6 +13,7 @@ classdef RtStruct < handle
 		description = '';
 		label = '';
 		name = '';
+		patientName = '';
 		time = '';
 	end
 
@@ -26,11 +27,14 @@ classdef RtStruct < handle
 	methods
 		%-------------------------------------------------------------------------
 		function this = RtStruct(jRtStruct)
+			import ether.dicom.Tag;
 			this.jRtStruct = jRtStruct;
 			this.date = char(jRtStruct.getStructureSetDate());
 			this.description = char(jRtStruct.getStructureSetDescription());
 			this.label = char(jRtStruct.getStructureSetLabel());
 			this.name = char(jRtStruct.getStructureSetName());
+			jDcm = jRtStruct.getDicomObject();
+			this.patientName = char(jDcm.getString(Tag.PatientName));
 			this.time = char(jRtStruct.getStructureSetTime());
 		end
 

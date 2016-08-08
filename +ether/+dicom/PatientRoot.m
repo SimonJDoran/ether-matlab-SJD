@@ -12,12 +12,14 @@ classdef PatientRoot < handle
 	end
 
 	properties(Access=private)
+		jRoot;
 		patientMap;
 	end
 	
 	methods
 		%-------------------------------------------------------------------------
-		function this = PatientRoot()
+		function this = PatientRoot(jRoot)
+			this.jRoot = jRoot;
 			this.patientMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 		end
 
@@ -36,6 +38,13 @@ classdef PatientRoot < handle
 
 		%-------------------------------------------------------------------------
 		function array = getAllPatients(this)
+			if (this.patientMap.length ~= this.jRoot.getPatientCount())
+				jList = this.jRoot.getPatientList();
+				nPatients = jList.size();
+				for i=0:nPatients-1
+					this.addPatient(ether.dicom.Patient(jList.get(i)));
+				end
+			end
 			values = this.patientMap.values;
 			patients = [values{:}];
 			sortValues = arrayfun(@(x) x.name, patients, 'UniformOutput', false);

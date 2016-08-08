@@ -9,7 +9,23 @@ classdef ImageStudy < handle
 		startTime = '';
 	end
 	
+	%----------------------------------------------------------------------------
+	properties(Access=private)
+		javaStudy = [];
+	end
+
 	methods
+		function this = ImageStudy(jStudy)
+			if (numel(jStudy) ~= 1) || ~isa(jStudy, 'etherj.aim.ImageStudy')
+				return;
+			end
+			this.javaStudy = jStudy;
+			this.instanceUid = char(jStudy.getInstanceUid());
+			this.startDate = char(jStudy.getStartDate());
+			this.startTime = char(jStudy.getStartTime());
+			jSeries = jStudy.getSeries();
+			this.imageSeries = ether.aim.ImageSeries(jSeries);
+		end
 	end
 	
 end

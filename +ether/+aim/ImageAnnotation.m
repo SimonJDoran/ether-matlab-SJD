@@ -8,6 +8,7 @@ classdef ImageAnnotation < ether.aim.Annotation
 
 	%----------------------------------------------------------------------------
 	properties(Access=private)
+		javaIa = [];
 		markups;
 		references;
 	end
@@ -15,15 +16,47 @@ classdef ImageAnnotation < ether.aim.Annotation
 	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
-		function this = ImageAnnotation()
+		function this = ImageAnnotation(jIa)
 			this.markups = containers.Map('KeyType', 'char', 'ValueType', 'any');
 			this.references = containers.Map('KeyType', 'char', 'ValueType', 'any');
+			if (numel(jIa) ~= 1) || ~isa(jIa, 'etherj.aim.ImageAnnotation')
+				return;
+			end
+			this.javaIa = jIa;
+			this.uniqueIdentifier = char(jIa.getUid());
+			this.comment = char(jIa.getComment());
+			this.dateTime = char(jIa.getDateTime());
+			this.name = char(jIa.getName());
+			jMarkups = jIa.getMarkupList();
+			for j=0:jMarkups.size()-1
+				jMarkup = jMarkups.get(j);
+				if ~isa(jMarkup, 'etherj.aim.TwoDimensionPolyline')
+					continue;
+				end
+				markup = ether.aim.TwoDimensionPolyline(jMarkup);
+				this.markups(markup.uniqueIdentifier) = markup;
+			end
+			jRefs = jIa.getReferenceList();
+			for j=0:jRefs.size()-1
+				jRef = jRefs.get(j);
+				if ~isa(jRef, 'etherj.aim.DicomImageReference')
+					continue;
+				end
+				ref = ether.aim.DicomImageReference(jRef);
+				this.references(ref.uniqueIdentifier) = ref;
+			end
 		end
 
 		%-------------------------------------------------------------------------
-		function bool = addMarkup(this, markup)
+		function [bool,message] = addMarkup(this, markup)
 			bool = false;
+			message = '';
+			if ~isempty(this.javaIa)
+				message = 'ImageAnnotation is read-only as it is wrapping a Java object';
+				return;
+			end
 			if ~isa(markup, 'ether.aim.Markup')
+				message = 'Supplied markup must be: ether.aim.Markup';
 				return;
 			end
 			this.markups(markup.uniqueIdentifier) = markup;
@@ -50,8 +83,13 @@ classdef ImageAnnotation < ether.aim.Annotation
 		end
 
 		%-------------------------------------------------------------------------
-		function markup = removeMarkup(this, uid)
+		function [markup,message] = removeMarkup(this, uid)
 			markup = [];
+			message = '';
+			if ~isempty(this.javaIa)
+				message = 'ImageAnnotation is read-only as it is wrapping a Java object';
+				return;
+			end
 			if ~this.markups.isKey(uid)
 				return;
 			end
@@ -60,9 +98,15 @@ classdef ImageAnnotation < ether.aim.Annotation
 		end
 
 		%-------------------------------------------------------------------------
-		function bool = addReference(this, reference)
+		function [bool,message] = addReference(this, reference)
 			bool = false;
+			message = '';
+			if ~isempty(this.javaIa)
+				message = 'ImageAnnotation is read-only as it is wrapping a Java object';
+				return;
+			end
 			if ~isa(reference, 'ether.aim.Reference')
+				message = 'Supplied reference must be: ether.aim.Reference';
 				return;
 			end
 			this.references(reference.uniqueIdentifier) = reference;
@@ -89,8 +133,13 @@ classdef ImageAnnotation < ether.aim.Annotation
 		end
 
 		%-------------------------------------------------------------------------
-		function reference = removeReference(this, uid)
+		function [reference,message] = removeReference(this, uid)
 			reference = [];
+			message = '';
+			if ~isempty(this.javaIa)
+				message = 'ImageAnnotation is read-only as it is wrapping a Java object';
+				return;
+			end
 			if ~this.references.isKey(uid)
 				return;
 			end

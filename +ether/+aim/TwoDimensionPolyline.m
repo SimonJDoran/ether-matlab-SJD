@@ -6,6 +6,9 @@ classdef TwoDimensionPolyline < ether.aim.TwoDimensionGeometricShape
 	end
 
 	methods
+		function this = TwoDimensionPolyline(j2dShape)
+			this = this@ether.aim.TwoDimensionGeometricShape(j2dShape);
+		end
 	end
 
 end

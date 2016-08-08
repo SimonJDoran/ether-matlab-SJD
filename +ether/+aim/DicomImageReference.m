@@ -6,7 +6,21 @@ classdef DicomImageReference < ether.aim.ImageReference
 		imageStudy = [];
 	end
 
+	%----------------------------------------------------------------------------
+	properties(Access=private)
+		javaRef = [];
+	end
+
 	methods
+		function this = DicomImageReference(jRef)
+			if (numel(jRef) ~= 1) || ~isa(jRef, 'etherj.aim.DicomImageReference')
+				return;
+			end
+			this.javaRef = jRef;
+			this.uniqueIdentifier = char(jRef.getUid());
+			jStudy = jRef.getStudy();
+			this.imageStudy = ether.aim.ImageStudy(jStudy);
+		end
 	end
 
 end

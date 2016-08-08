@@ -55,7 +55,7 @@ classdef RtContour < handle
 			points = zeros(nPoints, 3);
 			for i=0:nPoints-1;
 				point = jList.get(i);
-				points(i+1,1:2) = [point.x,point.y];
+				points(i+1,1:3) = [point.x,point.y,point.z];
 			end
 		end
 

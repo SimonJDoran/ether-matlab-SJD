@@ -7,7 +7,19 @@ classdef Image < handle
 		sopInstanceUid = '';
 	end
 	
+	%----------------------------------------------------------------------------
+	properties(Access=private)
+		javaImage = [];
+	end
+
 	methods
+		function this = Image(jImage)
+			if (numel(jImage) ~= 1) || ~isa(jImage, 'etherj.aim.Image')
+				return;
+			end
+			this.javaImage = jImage;
+			this.sopInstanceUid = char(jImage.getInstanceUid());
+		end
 	end
 	
 end

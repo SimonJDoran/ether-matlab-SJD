@@ -17,6 +17,7 @@ classdef Patient < handle
 
 	%----------------------------------------------------------------------------
 	properties(Access=private)
+		jPatient;
 		studyMap;
 	end
 
@@ -54,10 +55,8 @@ classdef Patient < handle
 	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
-		function this = Patient(name, id, birthDate)
-			this.name = ether.dicom.Patient.fixName(name);
-			this.id = id;
-			this.birthDate = birthDate;
+		function this = Patient(jPatient)
+			this.jPatient = jPatient;
 			this.studyMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 		end
 
@@ -71,7 +70,39 @@ classdef Patient < handle
 		end
 
 		%-------------------------------------------------------------------------
+		function value = get.birthDate(this)
+			value = char(this.jPatient.getBirthDate());
+		end
+
+		%-------------------------------------------------------------------------
+		function value = get.id(this)
+			value = char(this.jPatient.getId());
+		end
+
+		%-------------------------------------------------------------------------
+		function value = get.name(this)
+			value = char(this.jPatient.getName());
+		end
+
+		%-------------------------------------------------------------------------
+		function value = get.otherId(this)
+			value = char(this.jPatient.getOtherId());
+		end
+
+		%-------------------------------------------------------------------------
+		function study = get.Study(this)
+			study = this.getAllStudies();
+		end
+
+		%-------------------------------------------------------------------------
 		function array = getAllStudies(this)
+			if (this.studyMap.length ~= this.jPatient.getStudyCount())
+				jList = this.jPatient.getStudyList();
+				nStudies = jList.size();
+				for i=0:nStudies-1
+					this.addStudy(ether.dicom.Study(jList.get(i)));
+				end
+			end
 			values = this.studyMap.values;
 			studies = [values{:}];
 			sortValues = arrayfun(@(x) datenum(x.date), studies);
@@ -82,12 +113,7 @@ classdef Patient < handle
 		%-------------------------------------------------------------------------
 		function key = getKey(this)
 			key = sprintf('%s_%s_%s', strrep(this.name, ' ', '_'), ...
-				ether.dicom.Utils.dateToDA(this.birthDate), this.id);
-		end
-
-		%-------------------------------------------------------------------------
-		function study = get.Study(this)
-			study = this.getAllStudies();
+				this.birthDate, this.id);
 		end
 
 		%-------------------------------------------------------------------------

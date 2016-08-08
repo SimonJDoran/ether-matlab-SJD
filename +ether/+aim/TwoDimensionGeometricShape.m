@@ -7,13 +7,39 @@ classdef (Abstract) TwoDimensionGeometricShape < ether.aim.GeometricShape
 		referencedFrameNumber = 0;
 	end
 
+	properties(Dependent)
+		coordCount;
+	end
+
 	properties(Access=protected)
 		coords = [];
+		java2dShape = [];
 	end
-	
+
 	methods
-		function this = TwoDimensionGeometricShape()
+		function this = TwoDimensionGeometricShape(j2dShape)
 			this.coords = containers.Map('KeyType', 'uint32', 'ValueType', 'any');
+			if ((numel(j2dShape) ~= 1) || ...
+				 ~isa(j2dShape, 'etherj.aim.TwoDimensionGeometricShape'))
+				return;
+			end
+			this.java2dShape = j2dShape;
+			this.uniqueIdentifier = char(j2dShape.getUid());
+			this.includeFlag = j2dShape.getIncludeFlag();
+			this.shapeIdentifier = j2dShape.getShapeId();
+			this.imageReferenceUid = char(j2dShape.getImageReferenceUid());
+			this.referencedFrameNumber = j2dShape.getReferencedFrameNumber();
+			jCoords = j2dShape.getCoordinateList();
+			for i=0:jCoords.size()-1
+				jCoord = jCoords.get(i);
+				coord = ether.aim.TwoDimensionCoordinate(uint32(jCoord.getIndex()), ...
+					jCoord.getX(), jCoord.getY());
+				this.coords(coord.index) = coord;
+			end
+		end
+
+		function value = get.coordCount(this)
+			value = this.coords.length;
 		end
 
 		function coords = getTwoDCoordinateArray(this)
@@ -37,8 +63,13 @@ classdef (Abstract) TwoDimensionGeometricShape < ether.aim.GeometricShape
 		end
 
 		%-------------------------------------------------------------------------
-		function bool = addTwoDCoordinate(this, coord)
+		function [bool,message] = addTwoDCoordinate(this, coord)
 			bool = false;
+			message = '';
+			if ~isempty(this.java2dShape)
+				message = 'TwoDimensionGeometricShape is read-only as it is wrapping a Java object';
+				return;
+			end
 			if ~isa(coord, 'ether.aim.TwoDimensionCoordinate')
 				return;
 			end
@@ -47,8 +78,13 @@ classdef (Abstract) TwoDimensionGeometricShape < ether.aim.GeometricShape
 		end
 
 		%-------------------------------------------------------------------------
-		function coord = removeTwoDCoordinate(this, idx)
+		function [coord,message] = removeTwoDCoordinate(this, idx)
 			coord = [];
+			message = '';
+			if ~isempty(this.java2dShape)
+				message = 'TwoDimensionGeometricShape is read-only as it is wrapping a Java object';
+				return;
+			end
 			if ~this.coords.isKey(idx)
 				return;
 			end

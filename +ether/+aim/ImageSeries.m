@@ -10,18 +10,33 @@ classdef ImageSeries < handle
 	%----------------------------------------------------------------------------
 	properties(Access=private)
 		images;
+		javaSeries = [];
 	end
 
 	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
-		function this = ImageSeries()
+		function this = ImageSeries(jSeries)
 			this.images = containers.Map('KeyType', 'char', 'ValueType', 'any');
+			if (numel(jSeries) ~= 1) || ~isa(jSeries, 'etherj.aim.ImageSeries')
+				return;
+			end
+			this.javaSeries = jSeries;
+			jImages = jSeries.getImageList();
+			for i=0:jImages.size()-1
+				image = ether.aim.Image(jImages.get(i));
+				this.images(image.sopInstanceUid) = image;
+			end
 		end
 
 		%-------------------------------------------------------------------------
-		function bool = addImage(this, image)
+		function [bool,message] = addImage(this, image)
 			bool = false;
+			message = '';
+			if ~isempty(this.javaIa)
+				message = 'ImageAnnotation is read-only as it is wrapping a Java object';
+				return;
+			end
 			if ~isa(image, 'ether.aim.Image')
 				return;
 			end
@@ -49,8 +64,13 @@ classdef ImageSeries < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function image = removeImage(this, uid)
+		function [image,message] = removeImage(this, uid)
 			image = [];
+			message = '';
+			if ~isempty(this.javaIa)
+				message = 'ImageAnnotation is read-only as it is wrapping a Java object';
+				return;
+			end
 			if ~this.images.isKey(uid)
 				return;
 			end

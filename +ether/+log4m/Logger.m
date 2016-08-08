@@ -292,7 +292,7 @@ classdef Logger < ether.log4m.AppenderAttachable & ether.log4m.Loggable
 			if nargin < 4
 				frames = 1;
 			end
-			output = [this.getPrefix(level, frames),message()];
+			output = [this.getPrefix(level, frames),this.slashFix(message())];
 			this.callAppenders(output);
 		end
 
@@ -310,6 +310,29 @@ classdef Logger < ether.log4m.AppenderAttachable & ether.log4m.Loggable
 					logger.aai.callAppenders(message);
 				end
 				logger = logger.parent;
+			end
+		end
+
+		%-------------------------------------------------------------------------
+		function fixed = slashFix(this, message)
+			fixed = message;
+			slashIdx = strfind(message, '\');
+			if isempty(slashIdx)
+				return;
+			end
+			nChar = length(message);
+			for i=1:numel(slashIdx)
+				idx = slashIdx(i);
+				if (idx == nChar)
+					fixed(idx) = '/';
+					break;
+				end
+				% If next character isn't a valid escape, replace it with a /
+				switch message(idx+1)
+					case {'\','a','b','f','n','r','t','v','x','1','2','3','4','5','6','7','8','9','0'}
+					otherwise
+						fixed(idx) = '/';
+				end
 			end
 		end
 

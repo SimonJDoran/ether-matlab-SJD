@@ -10,19 +10,37 @@ classdef ImageAnnotationCollection < ether.aim.AnnotationCollection
 	%----------------------------------------------------------------------------
 	properties(Access=private)
 		annotations;
+		javaIac = [];
 	end
 
 	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
-		function this = ImageAnnotationCollection()
+		function this = ImageAnnotationCollection(jIac)
 			this.annotations = containers.Map('KeyType', 'char', 'ValueType', 'any');
+			if ((numel(jIac) ~= 1) || ~isa(jIac, 'etherj.aim.ImageAnnotationCollection'))
+				return;
+			end
+			this.javaIac = jIac;
+			this.person = ether.aim.Person(jIac.getPerson());
+			jIaList = jIac.getAnnotationList();
+			for i=0:jIaList.size()-1
+				jIa = jIaList.get(i);
+				ia = ether.aim.ImageAnnotation(jIa);
+				this.annotations(ia.uniqueIdentifier) = ia;
+			end
 		end
 
 		%-------------------------------------------------------------------------
-		function bool = addAnnotation(this, annotation)
+		function [bool,message] = addAnnotation(this, annotation)
 			bool = false;
+			message = '';
+			if ~isempty(this.javaIac)
+				message = 'ImageAnnotationCollection is read-only as it is wrapping a Java object';
+				return;
+			end
 			if ~isa(annotation, 'ether.aim.ImageAnnotation')
+				message = 'Supplied annotation must be: ether.aim.ImageAnnotation';
 				return;
 			end
 			this.annotations(annotation.uniqueIdentifier) = annotation;
@@ -54,9 +72,20 @@ classdef ImageAnnotationCollection < ether.aim.AnnotationCollection
 		end
 
 		%-------------------------------------------------------------------------
-		function annotation = removeAnnotation(this, uid)
+		function iac = getJavaIac(this)
+			iac = this.javaIac;
+		end
+
+		%-------------------------------------------------------------------------
+		function [annotation,message] = removeAnnotation(this, uid)
 			annotation = [];
+			message = '';
+			if ~isempty(this.javaIac)
+				message = 'ImageAnnotationCollection is read-only as it is wrapping a Java object';
+				return;
+			end
 			if ~this.annotations.isKey(uid)
+				message = ['No annotation found for key: ',uid];
 				return;
 			end
 			annotation = this.annotations(uid);
