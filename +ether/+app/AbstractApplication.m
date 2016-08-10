@@ -16,12 +16,21 @@ classdef AbstractApplication < handle
 	end
 
 	%----------------------------------------------------------------------------
+	properties(Dependent)
+		productDir;
+	end
+
+	%----------------------------------------------------------------------------
 	methods
+		%-------------------------------------------------------------------------
+		function path = get.productDir(this)
+			path = [ether.getUserDir,filesep,'.',this.productTag,filesep];
+		end
+
 		%-------------------------------------------------------------------------
 		function run(this)
 			this.logger.info(@() sprintf('%s startup', this.productName));
-			path = [ether.getUserDir,filesep,'.',this.productTag];
-			if (exist(path, 'dir') ~= 7)
+			if (exist(this.productDir, 'dir') ~= 7)
 				[status,message,messageId] = mkdir(path);
 				if ~status
 					this.logger.warn(@() sprintf('%s not created. %s - %s', ...
@@ -30,8 +39,14 @@ classdef AbstractApplication < handle
 					this.logger.info(@() sprintf('%s created', path));
 				end
 			end
-				
+			this.initApplication();
 		end
+	end
+
+	%----------------------------------------------------------------------------
+	methods(Abstract,Access=protected)
+		%-------------------------------------------------------------------------
+		initApplication(this);
 	end
 
 	%----------------------------------------------------------------------------
