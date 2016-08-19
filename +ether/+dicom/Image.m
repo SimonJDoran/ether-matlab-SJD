@@ -21,7 +21,7 @@ classdef Image < handle
 		pixelData = [];
 		pixelSpacing = [NaN;NaN];
 		rows = [];
-		rescaleIntercept = NaN;;
+		rescaleIntercept = NaN;
 		rescaleSlope = NaN;
 		scaleIntercept = NaN;
 		scaleSlope = NaN;
