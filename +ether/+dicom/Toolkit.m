@@ -132,6 +132,10 @@ classdef Toolkit < handle
 		%-------------------------------------------------------------------------
 		function series = createSeries(this, arg)
 			import ether.dicom.*;
+			if isempty(arg)
+				series = [];
+				return;
+			end
 			if isa(arg, 'etherj.dicom.Series')
 				series = this.processSeries(arg);
 				return;
