@@ -25,6 +25,9 @@ classdef (Abstract) TwoDimensionGeometricShape < ether.aim.GeometricShape
 			end
 			this.java2dShape = j2dShape;
 			this.uniqueIdentifier = char(j2dShape.getUid());
+			this.description = char(j2dShape.getDescription());
+			this.label = char(j2dShape.getLabel());
+			this.lineColour = char(j2dShape.getLineColour());
 			this.includeFlag = j2dShape.getIncludeFlag();
 			this.shapeIdentifier = j2dShape.getShapeId();
 			this.imageReferenceUid = char(j2dShape.getImageReferenceUid());

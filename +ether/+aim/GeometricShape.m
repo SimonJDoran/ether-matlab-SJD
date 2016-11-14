@@ -3,6 +3,9 @@ classdef (Abstract) GeometricShape < ether.aim.Markup
 	%   Detailed explanation goes here
 	
 	properties
+		description = '';
+		label = '';
+		lineColour = '';
 		includeFlag = false;
 		shapeIdentifier = 0;
 	end

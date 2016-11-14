@@ -14,6 +14,11 @@ classdef ImageAnnotationCollection < ether.aim.AnnotationCollection
 	end
 
 	%----------------------------------------------------------------------------
+	properties(Dependent)
+ 		annotationCount;
+	end
+
+	%----------------------------------------------------------------------------
 	methods
 		%-------------------------------------------------------------------------
 		function this = ImageAnnotationCollection(jIac)
@@ -22,6 +27,12 @@ classdef ImageAnnotationCollection < ether.aim.AnnotationCollection
 				return;
 			end
 			this.javaIac = jIac;
+			this.aimVersion = char(jIac.getAimVersion());
+			this.dateTime = char(jIac.getDateTime());
+			this.description = char(jIac.getDescription());
+			this.equipment = ether.aim.Equipment(jIac.getEquipment());
+			this.uniqueIdentifier = char(jIac.getUid());
+			this.user = ether.aim.User(jIac.getUser());
 			this.person = ether.aim.Person(jIac.getPerson());
 			jIaList = jIac.getAnnotationList();
 			for i=0:jIaList.size()-1
@@ -68,12 +79,17 @@ classdef ImageAnnotationCollection < ether.aim.AnnotationCollection
 
 		%-------------------------------------------------------------------------
 		function count = getAnnotationCount(this)
-			count = this.annotations.size();
+			count = this.annotations.length();
 		end
 
 		%-------------------------------------------------------------------------
 		function iac = getJavaIac(this)
 			iac = this.javaIac;
+		end
+
+		%-------------------------------------------------------------------------
+		function value = get.annotationCount(this)
+			value = this.annotations.length();
 		end
 
 		%-------------------------------------------------------------------------

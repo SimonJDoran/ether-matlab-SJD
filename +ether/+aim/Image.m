@@ -18,6 +18,7 @@ classdef Image < handle
 				return;
 			end
 			this.javaImage = jImage;
+			this.sopClassUid = char(jImage.getSopClassUid());
 			this.sopInstanceUid = char(jImage.getInstanceUid());
 		end
 	end

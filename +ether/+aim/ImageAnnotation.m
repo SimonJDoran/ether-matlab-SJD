@@ -30,10 +30,13 @@ classdef ImageAnnotation < ether.aim.Annotation
 			jMarkups = jIa.getMarkupList();
 			for j=0:jMarkups.size()-1
 				jMarkup = jMarkups.get(j);
-				if ~isa(jMarkup, 'etherj.aim.TwoDimensionPolyline')
+				if isa(jMarkup, 'etherj.aim.TwoDimensionPolyline')
+					markup = ether.aim.TwoDimensionPolyline(jMarkup);
+				elseif isa(jMarkup, 'etherj.aim.TwoDimensionCircle')
+					markup = ether.aim.TwoDimensionCircle(jMarkup);
+				else
 					continue;
 				end
-				markup = ether.aim.TwoDimensionPolyline(jMarkup);
 				this.markups(markup.uniqueIdentifier) = markup;
 			end
 			jRefs = jIa.getReferenceList();
@@ -147,6 +150,17 @@ classdef ImageAnnotation < ether.aim.Annotation
 			this.references.remove(uid);
 		end
 
+		function refList = getReferencedSeriesUidList(this)
+			refList = ether.collect.CellArrayList('char');
+			refs = this.getAllReferences();
+			seriesUids = arrayfun(...
+				@(ref) ref.imageStudy.imageSeries.instanceUid, ...
+				refs, 'UniformOutput', false);
+			seriesUids = unique(seriesUids);
+			for i=1:numel(seriesUids)
+				refList.add(seriesUids(i));
+			end
+		end
 	end
 	
 end

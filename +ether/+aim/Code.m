@@ -10,7 +10,11 @@ classdef Code < handle
 	end
 	
 	methods
-		function this = Code()
+		function this = Code(jCode)
+			this.code = char(jCode.getCode());
+			this.codeSystem = char(jCode.getCodeSystem());
+			this.codeSystemName = char(jCode.getCodeSystemName());
+			this.codeSystemVersion = char(jCode.getCodeSystemVersion());
 		end
 	end
 	

@@ -5,6 +5,7 @@ classdef (Abstract) AnnotationCollection < handle
 	properties
 		aimVersion = '';
 		dateTime = '';
+		description = '';
 		equipment = [];
 		uniqueIdentifier = '';
 		user = [];

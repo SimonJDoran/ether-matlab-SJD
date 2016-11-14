@@ -22,6 +22,8 @@ classdef ImageSeries < handle
 				return;
 			end
 			this.javaSeries = jSeries;
+			this.instanceUid = char(jSeries.getInstanceUid());
+			this.modality = ether.aim.Code(jSeries.getModality());
 			jImages = jSeries.getImageList();
 			for i=0:jImages.size()-1
 				image = ether.aim.Image(jImages.get(i));

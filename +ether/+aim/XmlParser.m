@@ -205,6 +205,9 @@ classdef XmlParser < handle
 				case 'TwoDimensionPolyline'
 					markup = TwoDimensionPolyline();
 
+				case 'TwoDimensionCircle'
+					markup = TwoDimensionCircle();
+
 				otherwise
 					return;
 			end
