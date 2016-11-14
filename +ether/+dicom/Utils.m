@@ -53,10 +53,15 @@ classdef Utils < handle
 
 		%-------------------------------------------------------------------------
 		function time = tmToSeconds(tm)
+			% TM fields may be optional e.g. SeriesTime in GeneralSeriesModule
+			if isempty(tm)
+				time = 0;
+				return;
+			end
 			% Convert TM (time) field to floating point seconds since midnight
 			if ~(ischar(tm) && isvector(tm) && (numel(tm) >= 2))
 				throw(MException('Ether:Dicom:Utils:tmToSeconds', ...
-					'TM element invalid'));
+					['TM element invalid: ',tm]));
 			end
 			nTM = numel(tm);
 			hh = 3600*str2double(tm(1:2));
