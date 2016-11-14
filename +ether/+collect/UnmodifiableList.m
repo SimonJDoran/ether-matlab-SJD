@@ -20,14 +20,14 @@ classdef UnmodifiableList < ether.collect.List
 		end
 
 		%-------------------------------------------------------------------------
-		function bool = add(this, items)
+		function bool = add(~, ~)
 			bool = false;
 			throw(MException('Ether:List:Unmodifiable', ...
 				'Attempt to modify UnmodifiableList'));
 		end
 
 		%-------------------------------------------------------------------------
-		function items = clear(this)
+		function items = clear(~)
 			items = [];
 			throw(MException('Ether:List:Unmodifiable', ...
 				'Attempt to modify UnmodifiableList'));
@@ -39,10 +39,10 @@ classdef UnmodifiableList < ether.collect.List
 				fprintf('0x0 CellArrayList<?>\n');
 				return;
 			end
-			fprintf('List<%s>\n', this.type);
-			for i=1:this.nCell
+			fprintf('List<%s>\n', this.list.type());
+			for i=1:this.list.size()
 				fprintf('  [%i] - ', i);
-				display(this.array{i});
+				display(this.list.get(i));
 			end
 		end
 
@@ -62,7 +62,7 @@ classdef UnmodifiableList < ether.collect.List
 		end
 
 		%-------------------------------------------------------------------------
-		function items = remove(this, idx)
+		function items = remove(~, ~)
 			items = [];
 			throw(MException('Ether:List:Unmodifiable', ...
 				'Attempt to modify UnmodifiableList'));
@@ -75,16 +75,12 @@ classdef UnmodifiableList < ether.collect.List
 
 		%-------------------------------------------------------------------------
 		function items = toArray(this)
-			if strcmp(this.class, 'char')
-				throw(MException('Ether:Collect:List', ...
-					'Cannot create regular array of type "char" without concatenation. Use toCellArray()'));
-			end
-			items = [this.array{1:this.nCell}];
+			items = this.list.toArray();
 		end
 
 		%-------------------------------------------------------------------------
 		function items = toCellArray(this)
-			items = {this.array{1:this.nCell}};
+			items = this.list.toCellArray();
 		end
 
 	end
