@@ -5,6 +5,7 @@ classdef Series < handle
 
 	%----------------------------------------------------------------------------
 	properties
+		date;
 		description;
 		instanceUid;
 		modality;
@@ -29,6 +30,7 @@ classdef Series < handle
 		%-------------------------------------------------------------------------
 		function this = Series(uid)
 			this.instanceUid = uid;
+			this.date = '';
 			this.description = '';
 			this.modality = ether.dicom.Modality.OT;
 			this.number = 65536;
