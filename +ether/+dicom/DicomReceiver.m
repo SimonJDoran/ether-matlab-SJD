@@ -52,7 +52,7 @@ classdef DicomReceiver < ether.dicom.PathScanListener
 		%	Callback method.
 		function sopInstanceFound(this, ~, data)
 			try
-				this.processSopInst(data.sopInstance);
+				this.processSopInst(data.sopInstance, this.toolkit);
 			catch ex
 				this.logger.warn(ether.formatException(ex));
 			end
@@ -135,7 +135,7 @@ classdef DicomReceiver < ether.dicom.PathScanListener
 		end
 
 		%-------------------------------------------------------------------------
-		function processSopInst(this, sopInst)
+		function processSopInst(this, sopInst, toolkit)
 			patient = this.findPatient(this.patientMap, sopInst, toolkit);
 			study = this.findStudy(patient, sopInst, toolkit);
 			series = this.findSeries(study, sopInst, toolkit);

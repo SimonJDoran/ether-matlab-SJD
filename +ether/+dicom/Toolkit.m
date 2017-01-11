@@ -93,9 +93,9 @@ classdef Toolkit < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function patient = createPatient(~, varargin)
+		function patient = createPatient(this, varargin)
 			import ether.dicom.*;
-			if (nargin == 2 && isa(varargin{1}, 'ether.dicom.SopInstance'))
+			if (nargin == 2 && isa(varargin{1}, 'ether.dicom.JavaSopInstance'))
 				sopInst = varargin{1};
 				name = sopInst.getValue(Tag.PatientName);
 				id = sopInst.getValue(Tag.PatientID);
@@ -109,7 +109,7 @@ classdef Toolkit < handle
 				id = varargin{2};
 				birthDate = varargin{3};
 			end
-			patient = ether.dicom.Patient(name, id, birthDate);
+			patient = this.jToolkit.createPatient(name, id, da);
 		end
 
 		%-------------------------------------------------------------------------
@@ -155,6 +155,7 @@ classdef Toolkit < handle
 			end
 			series.description = desc;
 			series.modality = sopInst.getValue(Tag.Modality);
+			series.date = sopInst.getValue(Tag.SeriesDate);
 			series.time = Utils.tmToSeconds(sopInst.getValue(Tag.SeriesTime));
 		end
 

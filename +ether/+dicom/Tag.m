@@ -28,6 +28,7 @@ classdef Tag
 		PatientBirthDate = uint32(hex2dec('00100030'));
 
 		%{ Group 0x0018 }%
+		SequenceName = uint32(hex2dec('00180024'));
 		SliceThickness = uint32(hex2dec('00180050'));
 		RepetitionTime = uint32(hex2dec('00180080'));
 		EchoTime = uint32(hex2dec('00180081'));
@@ -37,6 +38,25 @@ classdef Tag
 		EffectiveEchoTime = uint32(hex2dec('00189082'));
 		MRTimingAndRelatedParametersSequence = uint32(hex2dec('00189112'));
 		MREchoSequence = uint32(hex2dec('00189114'));
+
+		%{ Group 0x0019 Private Siemens fields }%
+		PrivateModuleType = uint32(hex2dec('00191008'));                %CS
+		PrivateModuleVersion = uint32(hex2dec('00191009'));             %LO
+		PrivateModuleOwnerCode = uint32(hex2dec('00190010'));           %LO
+		PrivateFlowCompensation = uint32(hex2dec('00191011'));          %SH
+		PrivateTablePositionOrigin = uint32(hex2dec('00191012'));       %SL 3
+		PrivateImaAbsTablePosition = uint32(hex2dec('00191013'));       %SL 3
+		PrivateImaRelTablePosition = uint32(hex2dec('00191014'));   	 %IS 3
+		PrivateSlicePosition_PCS = uint32(hex2dec('00191015'));         %FD 3
+		PrivateTimeAfterStart = uint32(hex2dec('00191016'));            %DS
+		PrivateSliceResolution = uint32(hex2dec('00191017'));           %DS
+		PrivateRealDwellTime = uint32(hex2dec('00191018'));             %IS
+		PrivateSliceMeasurementDuration = uint32(hex2dec('0019100B'));  %DS
+		PrivateB_value = uint32(hex2dec('0019100C'));                   %IS
+		PrivateDiffusionDirectionality = uint32(hex2dec('0019100D'));   %CS
+		PrivateB_vector = uint32(hex2dec('0019100E'));                  %FD 3
+		PrivateGradientMode = uint32(hex2dec('0019100F'));              %SH
+		BandwidthPerPixelPhaseEncode = uint32(hex2dec('00191028'));     %FD
 
 		%{ Group 0x0020 }%
 		StudyID = uint32(hex2dec('00200010'));
