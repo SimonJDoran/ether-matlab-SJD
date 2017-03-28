@@ -154,10 +154,10 @@ classdef CellArrayList < ether.collect.List
 		%-------------------------------------------------------------------------
 		function items = toArray(this)
 			if strcmp(this.class, 'char')
-				throw(MException('Ether:Collect:List', ...
-					'Cannot create regular array of type "char" without concatenation. Use toCellArray()'));
+				items = {this.array{1:this.nCell}};
+			else
+				items = [this.array{1:this.nCell}];
 			end
-			items = [this.array{1:this.nCell}];
 		end
 
 		%-------------------------------------------------------------------------
