@@ -2,7 +2,7 @@ classdef ImageSeries < handle
 	%IMAGESERIES Summary of this class goes here
 	%   Detailed explanation goes here
 	
-	properties
+	properties(SetAccess=private)
 		instanceUid = '';
 		modality = [];
 	end

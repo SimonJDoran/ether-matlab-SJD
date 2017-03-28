@@ -2,7 +2,7 @@ classdef DicomImageReference < ether.aim.ImageReference
 	%DICOMIMAGEREFERENCE Summary of this class goes here
 	%   Detailed explanation goes here
 
-	properties
+	properties(SetAccess=private)
 		imageStudy = [];
 	end
 

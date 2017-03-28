@@ -150,6 +150,7 @@ classdef ImageAnnotation < ether.aim.Annotation
 			this.references.remove(uid);
 		end
 
+		%-------------------------------------------------------------------------
 		function refList = getReferencedSeriesUidList(this)
 			refList = ether.collect.CellArrayList('char');
 			refs = this.getAllReferences();

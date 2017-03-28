@@ -62,7 +62,7 @@ classdef ImageAnnotationCollection < ether.aim.AnnotationCollection
 		function annotations = getAllAnnotations(this)
 			annotations = this.annotations.values;
 			if numel(annotations) > 0
-				annotations = annotations{:};
+				annotations = [annotations{:}];
 			else
 				annotations = [];
 			end

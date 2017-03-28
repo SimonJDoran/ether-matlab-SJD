@@ -2,7 +2,7 @@ classdef ImageStudy < handle
 	%IMAGESTUDY Summary of this class goes here
 	%   Detailed explanation goes here
 	
-	properties
+	properties(SetAccess=private)
 		imageSeries = [];
 		instanceUid = '';
 		startDate = '';
