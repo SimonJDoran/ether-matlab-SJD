@@ -84,32 +84,31 @@ classdef Toolkit < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function root = createPatientRoot(this, arg)
-			if ((nargin == 2) && (isa(arg, 'etherj.dicom.PatientRoot')))
-				root = ether.dicom.PatientRoot(arg);
+		function root = createPatientRoot(~, jRoot)
+			if isempty(jRoot)
+				root = [];
 				return;
 			end
-			root = ether.dicom.PatientRoot(this.jToolkit.createPatientRoot());
+			if (isa(jRoot, 'etherj.dicom.PatientRoot'))
+				root = ether.dicom.PatientRoot(jRoot);
+				return;
+			end
+			throw(MException('Ether:DICOM:Toolkit', ...
+				['Illegal argument type: ',class(jRoot),' etherj.dicom.PatientRoot required']));
 		end
 
 		%-------------------------------------------------------------------------
-		function patient = createPatient(this, varargin)
-			import ether.dicom.*;
-			if (nargin == 2 && isa(varargin{1}, 'ether.dicom.JavaSopInstance'))
-				sopInst = varargin{1};
-				name = sopInst.getValue(Tag.PatientName);
-				id = sopInst.getValue(Tag.PatientID);
-				if isempty(id)
-					id = '';
-				end
-				da = sopInst.getValue(Tag.PatientBirthDate);
-				birthDate = Utils.daToDateVector(da);
-			else
-				name = varargin{1};
-				id = varargin{2};
-				birthDate = varargin{3};
+		function patient = createPatient(~, jPatient)
+			if isempty(jPatient)
+				patient = [];
+				return;
 			end
-			patient = this.jToolkit.createPatient(name, id, da);
+			if (isa(jPatient, 'etherj.dicom.Patient'))
+				patient = ether.dicom.Patient(jPatient);
+				return;
+			end
+			throw(MException('Ether:DICOM:Toolkit', ...
+				['Illegal argument type: ',class(jPatient),' etherj.dicom.Patient required']));
 		end
 
 		%-------------------------------------------------------------------------
@@ -130,81 +129,48 @@ classdef Toolkit < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function series = createSeries(this, arg)
-			import ether.dicom.*;
-			if isempty(arg)
+		function series = createSeries(~, jSeries)
+			if isempty(jSeries)
 				series = [];
 				return;
 			end
-			if isa(arg, 'etherj.dicom.Series')
-				series = this.processSeries(arg);
+			if isa(jSeries, 'etherj.dicom.Series')
+				series = ether.dicom.Series(jSeries);
 				return;
 			end
-			if ~isa(arg, 'ether.dicom.SopInstance')
-				% arg should be UID
-				series = ether.dicom.Series(arg);
-				return;
-			end
-			sopInst = arg;
-			uid = sopInst.seriesUid;
-			series = ether.dicom.Series(uid);
-			series.number = sopInst.getValue(Tag.SeriesNumber);
-			desc = sopInst.getValue(Tag.SeriesDescription);
-			if isempty(desc)
-				desc = '';
-			end
-			series.description = desc;
-			series.modality = sopInst.getValue(Tag.Modality);
-			series.date = sopInst.getValue(Tag.SeriesDate);
-			series.time = Utils.tmToSeconds(sopInst.getValue(Tag.SeriesTime));
+			throw(MException('Ether:DICOM:Toolkit', ...
+				['Illegal argument type: ',class(jSeries),' etherj.dicom.Series required']));
 		end
 
 		%-------------------------------------------------------------------------
-		function sopInst = createSopInstance(this, filename, etherDcm)
+		function sopInst = createSopInstance(~, filename, dcm)
 			import ether.dicom.*;
 			switch nargin
-				case 1
-					sopInst = JavaSopInstance();
-					return;
-
 				case 2
 					sopInst = JavaSopInstance(filename);
 					return;
 
 				case 3
-					sopInst = JavaSopInstance(filename, etherDcm);
+					sopInst = JavaSopInstance(filename, dcm);
 					return;
 
 				otherwise
+					throw(MException('Ether:DICOM:Toolkit', 'Filename required'));
 			end
 		end
 
 		%-------------------------------------------------------------------------
-		function study = createStudy(~, arg)
-			import ether.dicom.*;
-			if ~isa(arg, 'ether.dicom.SopInstance')
-				study = ether.dicom.Study(arg);
+		function study = createStudy(~, jStudy)
+			if isempty(jStudy)
+				study = [];
 				return;
 			end
-			sopInst = arg;
-			uid = sopInst.studyUid;
-			study = ether.dicom.Study(uid);
-			study.date = Utils.daToDateVector(sopInst.getValue(Tag.StudyDate));
-			desc = sopInst.getValue(Tag.StudyDescription);
-			if isempty(desc)
-				desc = '';
+			if isa(jStudy, 'etherj.dicom.Study')
+				study = ether.dicom.Study(jStudy);
+				return;
 			end
-			study.description = desc;
-			id = sopInst.getValue(Tag.StudyID);
-			if isempty(id)
-				id = '';
-			end
-			study.id = id;
-			accession = sopInst.getValue(Tag.AccessionNumber);
-			if isempty(accession)
-				accession = '';
-			end
-			study.accession = accession;
+			throw(MException('Ether:DICOM:Toolkit', ...
+				['Illegal argument type: ',class(jStudy),' etherj.dicom.Study required']));
 		end
 
 		%-------------------------------------------------------------------------
@@ -223,65 +189,6 @@ classdef Toolkit < handle
 		function this = Toolkit()
 			this.imageUidMap = [];
 			this.jToolkit = etherj.dicom.DicomToolkit.getToolkit();
-		end
-
-		%-------------------------------------------------------------------------
-		function patient = processPatient(this, jPatient)
-			import ether.dicom.*;
-			jStudyList = jPatient.getStudyList();
-			nStudies = jStudyList.size();
-			% Patient exists, must have at least one study with one series
-			jSopInst = jStudyList.get(0).getSeriesList().get(0).getSopInstanceList().get(0);
-			dcm = this.createSopInstance(char(jSopInst.getPath()), ...
-				JavaDicom(jSopInst.getDicomObject()));
-			patient = this.createPatient(dcm);
-			for i=0:nStudies-1
-				patient.addStudy(this.processStudy(jStudyList.get(i)));
-			end
-		end
-
-		%-------------------------------------------------------------------------
-		function root = processPatientRoot(this, jRoot)
-			import ether.dicom.*;
-			root = PatientRoot();
-			jPatList = jRoot.getPatientList();
-			nPatients = jPatList.size();
-			for i=0:nPatients-1
-				root.addPatient(this.processPatient(jPatList.get(i)));
-			end
-		end
-
-		%-------------------------------------------------------------------------
-		function series = processSeries(this, jSeries)
-			import ether.dicom.*;
-			jSopInstList = jSeries.getSopInstanceList();
-			nSopInst = jSopInstList.size();
-			% Series exists, must have at least one SOP instance
-			jSopInst = jSopInstList.get(0);
-			dcm = this.createSopInstance(char(jSopInst.getPath()), ...
-				JavaDicom(jSopInst.getDicomObject()));
-			series = this.createSeries(dcm);
-			for i=0:nSopInst-1
-				jSopInst = jSopInstList.get(i);
-				dcm = this.createSopInstance(char(jSopInst.getPath()), ...
-					JavaDicom(jSopInst.getDicomObject()));
-				series.addSopInstance(dcm, this);
-			end
-		end
-
-		%-------------------------------------------------------------------------
-		function study = processStudy(this, jStudy)
-			import ether.dicom.*;
-			jSeriesList = jStudy.getSeriesList();
-			nSeries = jSeriesList.size();
-			% Study exists, must have at least one series
-			jSopInst = jSeriesList.get(0).getSopInstanceList().get(0);
-			dcm = this.createSopInstance(char(jSopInst.getPath()), ...
-				JavaDicom(jSopInst.getDicomObject()));
-			study = this.createStudy(dcm);
-			for i=0:nSeries-1
-				study.addSeries(this.processSeries(jSeriesList.get(i)));
-			end
 		end
 
 		%-------------------------------------------------------------------------

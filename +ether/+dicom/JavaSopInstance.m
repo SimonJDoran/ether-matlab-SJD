@@ -18,9 +18,11 @@ classdef JavaSopInstance < ether.dicom.SopInstance
 		%-------------------------------------------------------------------------
 		function this = JavaSopInstance(filename, inDcm)
 			this@ether.dicom.SopInstance();
-			if nargin == 1
-				this.filename = filename;
+			if nargin == 0
+				throw(MException('Ether:DICOM:JavaSopInstance', ...
+					'Filename required'));
 			end
+			this.filename = filename;
 			if nargin == 2
 				if isa(inDcm, 'org.dcm4che2.data.DicomObject')
 					this.dcm = ether.dicom.JavaDicom(inDcm);

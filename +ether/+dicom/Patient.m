@@ -4,15 +4,15 @@ classdef Patient < handle
 
 	%----------------------------------------------------------------------------
 	properties
-		birthDate;
-		id;
-		name;
-		otherId = '';
 	end
 
 	%----------------------------------------------------------------------------
 	properties(SetAccess=private)
-		Study;
+		birthDate;
+		id;
+		name;
+		otherId = '';
+		Studies;
 	end
 
 	%----------------------------------------------------------------------------
@@ -56,16 +56,27 @@ classdef Patient < handle
 	methods
 		%-------------------------------------------------------------------------
 		function this = Patient(jPatient)
+			import ether.dicom.*;
 			this.jPatient = jPatient;
 			this.studyMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
-		end
-
-		%-------------------------------------------------------------------------
-		function bool = addStudy(this, study)
-			uid = study.instanceUid;
-			bool = ~this.studyMap.isKey(uid);
-			if bool
-				this.studyMap(uid) = study;
+			this.name = char(jPatient.getName());
+			this.id = char(jPatient.getId());
+			da = char(jPatient.getBirthDate());
+ 			this.birthDate = Utils.daToDateVector(da);
+% 				name = sopInst.getValue(Tag.PatientName);
+% 				id = sopInst.getValue(Tag.PatientID);
+% 				if isempty(id)
+% 					id = '';
+% 				end
+% 				da = sopInst.getValue(Tag.PatientBirthDate);
+% 				birthDate = Utils.daToDateVector(da);
+			% Process the children
+			toolkit = Toolkit.getToolkit();
+			jStudyList = jPatient.getStudyList();
+			nStudies = jStudyList.size();
+			for i=0:nStudies-1
+				study = toolkit.createStudy(jStudyList.get(i));
+				this.addStudy(study);
 			end
 		end
 
@@ -90,19 +101,12 @@ classdef Patient < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function study = get.Study(this)
+		function study = get.Studies(this)
 			study = this.getAllStudies();
 		end
 
 		%-------------------------------------------------------------------------
 		function array = getAllStudies(this)
-			if (this.studyMap.length ~= this.jPatient.getStudyCount())
-				jList = this.jPatient.getStudyList();
-				nStudies = jList.size();
-				for i=0:nStudies-1
-					this.addStudy(ether.dicom.Study(jList.get(i)));
-				end
-			end
 			values = this.studyMap.values;
 			studies = [values{:}];
 			sortValues = arrayfun(@(x) datenum(x.date), studies);
@@ -143,5 +147,17 @@ classdef Patient < handle
 
 	end
 	
+	%----------------------------------------------------------------------------
+	methods(Access=private)
+		%-------------------------------------------------------------------------
+		function bool = addStudy(this, study)
+			uid = study.instanceUid;
+			bool = ~this.studyMap.isKey(uid);
+			if bool
+				this.studyMap(uid) = study;
+			end
+		end
+	end
+
 end
 

@@ -2,13 +2,9 @@ classdef PatientRoot < handle
 	%PATIENTROOT Container for DICOM Patients
 	%   Detailed explanation goes here
 	
-	properties(Constant)
-		logger = ether.log4m.Logger.getLogger('ether.dicom.PatientRoot');
-	end
-
 	%----------------------------------------------------------------------------
 	properties(SetAccess=private)
-		Patient;
+		Patients;
 	end
 
 	properties(Access=private)
@@ -21,30 +17,18 @@ classdef PatientRoot < handle
 		function this = PatientRoot(jRoot)
 			this.jRoot = jRoot;
 			this.patientMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
-		end
-
-		%-------------------------------------------------------------------------
-		function addPatient(this, patient)
-			nPatients = numel(patient);
-			for ii=1:nPatients
-				key = patient(ii).getKey();
-				if ~this.patientMap.isKey(key)
-					this.patientMap(key) = patient(ii);
-				else
-					this.logger.warn('TODO: Implement merging of patients');
-				end
+			% Process the children
+			toolkit = ether.dicom.Toolkit.getToolkit();
+			jList = this.jRoot.getPatientList();
+			nPatients = jList.size();
+			for i=0:nPatients-1
+				patient = toolkit.createPatient(jList.get(i));
+				this.patientMap(patient.getKey()) = patient;
 			end
 		end
 
 		%-------------------------------------------------------------------------
 		function array = getAllPatients(this)
-			if (this.patientMap.length ~= this.jRoot.getPatientCount())
-				jList = this.jRoot.getPatientList();
-				nPatients = jList.size();
-				for i=0:nPatients-1
-					this.addPatient(ether.dicom.Patient(jList.get(i)));
-				end
-			end
 			values = this.patientMap.values;
 			patients = [values{:}];
 			sortValues = arrayfun(@(x) x.name, patients, 'UniformOutput', false);
@@ -53,7 +37,7 @@ classdef PatientRoot < handle
 		end
 
 		%-------------------------------------------------------------------------
-		function patient = get.Patient(this)
+		function patient = get.Patients(this)
 			patient = this.getAllPatients();
 		end
 
@@ -81,17 +65,6 @@ classdef PatientRoot < handle
 		function hasKey = hasPatient(this, key)
 			hasKey = this.patientMap.isKey(key);
 		end
-
-		%-------------------------------------------------------------------------
-		function patient = removePatient(this, key)
-			patient = [];
-			keyIdx = this.patientMap.isKey(key);
-			if any(keyIdx)
-				patient = this.patientMap(key(keyIdx));
-				this.patientMap.remove(key(keyIdx));
-			end
-		end
-
 	end
 	
 end

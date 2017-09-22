@@ -5,40 +5,53 @@ classdef Study < handle
 
 	%----------------------------------------------------------------------------
 	properties
+	end
+
+	%----------------------------------------------------------------------------
+	properties(SetAccess=private)
 		accession;
 		date;
 		description;
 		id;
 		instanceUid;
-	end
-
-	%----------------------------------------------------------------------------
-	properties(SetAccess=private)
 		Series;
 	end
 
 	%----------------------------------------------------------------------------
 	properties(Access=private)
+		jStudy;
 		seriesMap;
 	end
 
 	methods
 		%-------------------------------------------------------------------------
-		function this = Study(uid)
-			this.instanceUid = uid;
+		function this = Study(jStudy)
+			this.jStudy = jStudy;
+			this.instanceUid = char(jStudy.getUid());
+			this.date = ether.dicom.Utils.daToDateVector(char(jStudy.getDate()));
+			desc = char(jStudy.getDescription());
+			if isempty(desc)
+				desc = '';
+			end
+			this.description = desc;
+			id = char(jStudy.getId());
+			if isempty(id)
+				id = '';
+			end
+			this.id = id;
+			accession = char(jStudy.getAccession());
+			if isempty(accession)
+				accession = '';
+			end
+			this.accession = accession;
 			this.seriesMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
-			this.date = [0,0,0,0,0,0];
-			this.description = '';
-			this.id = '';
-			this.accession = '';
-		end
-
-		%-------------------------------------------------------------------------
-		function bool = addSeries(this, series)
-			uid = series.instanceUid;
-			bool = ~this.seriesMap.isKey(uid);
-			if bool
-				this.seriesMap(uid) = series;
+			% Process the children
+			toolkit = ether.dicom.Toolkit.getToolkit();
+			jSeriesList = jStudy.getSeriesList();
+			nSeries = jSeriesList.size();
+			for i=0:nSeries-1
+				series = toolkit.createSeries(jSeriesList.get(i));
+				this.addSeries(series);
 			end
 		end
 
@@ -78,7 +91,26 @@ classdef Study < handle
 		%-------------------------------------------------------------------------
 		function series = removeSeries(this, uid)
 			series = this.getSeries(uid);
+			if (isempty(series))
+				return;
+			end
 			this.seriesMap.remove(uid);
+		end
+	end
+
+	%----------------------------------------------------------------------------
+	methods(Access=private)
+		%-------------------------------------------------------------------------
+		function bool = addSeries(this, series)
+			if (~strcmp(series.studyUid, this.instanceUid))
+				throw(MException('Ether:DICOM:Study', ...
+					['Series'' Study UID doesn''t match: ',series.studyUid']));
+			end
+			uid = series.instanceUid;
+			bool = ~this.seriesMap.isKey(uid);
+			if bool
+				this.seriesMap(uid) = series;
+			end
 		end
 	end
 

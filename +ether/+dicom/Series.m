@@ -5,6 +5,10 @@ classdef Series < handle
 
 	%----------------------------------------------------------------------------
 	properties
+	end
+
+	%----------------------------------------------------------------------------
+	properties(SetAccess=private)
 		date;
 		description;
 		instanceUid;
@@ -12,58 +16,49 @@ classdef Series < handle
 		number;
 		studyUid;
 		time;
-	end
-
-	%----------------------------------------------------------------------------
-	properties(SetAccess=private)
-		Image;
-		SopInstance;
+		Images;
+		SopInstances;
 	end
 
 	%----------------------------------------------------------------------------
 	properties(Access=private)
+		jSeries;
 		sopInstMap;
 		imageMap;
 	end
 
 	methods
 		%-------------------------------------------------------------------------
-		function this = Series(uid)
-			this.instanceUid = uid;
-			this.date = '';
-			this.description = '';
-			this.modality = ether.dicom.Modality.OT;
-			this.number = 65536;
-			this.studyUid = '';
-			this.time = 0;
+		function this = Series(jSeries)
+			this.jSeries = jSeries;
+			this.instanceUid = char(jSeries.getUid());
+			this.date = char(jSeries.getDate());
+			this.description = char(jSeries.getDescription());
+			this.modality = char(jSeries.getModality());
+			this.number = jSeries.getNumber();
+			this.studyUid = char(jSeries.getStudyUid());
+			this.time = jSeries.getTime();
 			this.sopInstMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
 			this.imageMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
-		end
-
-		%-------------------------------------------------------------------------
-		function bool = addSopInstance(this, sopInst, toolkit)
-			if (nargin == 2)
-				toolkit = ether.dicom.Toolkit.getToolkit();
-			end
-			uid = sopInst.instanceUid;
-			bool = ~this.sopInstMap.isKey(uid);
-			if bool
-				this.sopInstMap(uid) = sopInst;
-			end
-			images = toolkit.createImages(sopInst);
-			imageUids = arrayfun(@(x) x.getUid(), images, 'UniformOutput', false);
-			for ii=1:numel(imageUids)
-				this.imageMap(imageUids{ii}) = images(ii);
+			% Process the children
+			toolkit = ether.dicom.Toolkit.getToolkit();
+			jSopInstList = jSeries.getSopInstanceList();
+			nSopInst = jSopInstList.size();
+			for i=0:nSopInst-1
+				jSopInst = jSopInstList.get(i);
+				dcm = toolkit.createSopInstance(char(jSopInst.getPath()), ...
+					jSopInst.getDicomObject());
+				this.addSopInstance(dcm);
 			end
 		end
 
 		%-------------------------------------------------------------------------
-		function image = get.Image(this)
+		function image = get.Images(this)
 			image = this.getAllImages();
 		end
 
 		%-------------------------------------------------------------------------
-		function sopInst = get.SopInstance(this)
+		function sopInst = get.SopInstances(this)
 			sopInst = this.getAllSopInstances();
 		end
 
@@ -132,11 +127,28 @@ classdef Series < handle
 		function bool = hasSopInstance(this, uid)
 			bool = this.sopInstMap.isKey(uid);
 		end
+	end
 
+	%----------------------------------------------------------------------------
+	methods(Access=private)
 		%-------------------------------------------------------------------------
-		function sopInst = removeSopInstance(this, uid)
-			sopInst = this.getSopInstance(uid);
-			this.sopInstMap.remove(uid);
+		function bool = addSopInstance(this, sopInst)
+			toolkit = ether.dicom.Toolkit.getToolkit();
+			if (~strcmp(sopInst.seriesUid, this.instanceUid))
+				throw(MException('Ether:DICOM:Series', ...
+					['SopInstance''s Series UID doesn''t match: ',sopIsnt.seriesUid']));
+			end
+			uid = sopInst.instanceUid;
+			bool = this.sopInstMap.isKey(uid);
+			if bool
+				return;
+			end
+			this.sopInstMap(uid) = sopInst;
+			images = toolkit.createImages(sopInst);
+			imageUids = arrayfun(@(x) x.getUid(), images, 'UniformOutput', false);
+			for ii=1:numel(imageUids)
+				this.imageMap(imageUids{ii}) = images(ii);
+			end
 		end
 	end
 
