@@ -10,9 +10,9 @@ function result = dcmScanPath(directory, recurse)
 		recurse = true;
 	end
 
-	jDcmKit = etherj.dicom.DicomToolkit.getToolkit();
+	jDcmKit = icr.etherj.dicom.DicomToolkit.getToolkit();
 	pathScan = jDcmKit.createPathScan();
-	rx = etherj.dicom.DicomReceiver();
+	rx = icr.etherj.dicom.DicomReceiver();
 	pathScan.addContext(rx);
 	pathScan.scan(directory, recurse);
 	etherDcmKit = ether.dicom.Toolkit.getToolkit();

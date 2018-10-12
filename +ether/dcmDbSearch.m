@@ -6,7 +6,7 @@ function result = dcmDbSearch(searchStr)
 		throw(MException('Ether:DICOM', 'Search input must be a string'));
 	end
 
-	jDcmKit = etherj.dicom.DicomToolkit.getToolkit();
+	jDcmKit = icr.etherj.dicom.DicomToolkit.getToolkit();
 	dcmDb = jDcmKit.createDicomDatabase();
 	jPatientRoot = dcmDb.search(searchStr);
 	etherDcmKit = ether.dicom.Toolkit.getToolkit();

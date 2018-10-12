@@ -14,7 +14,7 @@ classdef Image < handle
 
 	methods
 		function this = Image(jImage)
-			if (numel(jImage) ~= 1) || ~isa(jImage, 'etherj.aim.Image')
+			if (numel(jImage) ~= 1) || ~isa(jImage, 'icr.etherj.aim.Image')
 				return;
 			end
 			this.javaImage = jImage;

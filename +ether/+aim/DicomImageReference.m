@@ -13,7 +13,7 @@ classdef DicomImageReference < ether.aim.ImageReference
 
 	methods
 		function this = DicomImageReference(jRef)
-			if (numel(jRef) ~= 1) || ~isa(jRef, 'etherj.aim.DicomImageReference')
+			if (numel(jRef) ~= 1) || ~isa(jRef, 'icr.etherj.aim.DicomImageReference')
 				return;
 			end
 			this.javaRef = jRef;

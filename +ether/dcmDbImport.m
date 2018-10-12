@@ -10,7 +10,7 @@ function dcmDbImport(directory, recurse)
 		recurse = true;
 	end
 
-	jDcmKit = etherj.dicom.DicomToolkit.getToolkit();
+	jDcmKit = icr.etherj.dicom.DicomToolkit.getToolkit();
 	dcmDb = jDcmKit.createDicomDatabase();
 	dcmDb.importDirectory(directory, recurse);
 	dcmDb.shutdown();

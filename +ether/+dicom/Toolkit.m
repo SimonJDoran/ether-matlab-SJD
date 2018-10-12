@@ -89,12 +89,12 @@ classdef Toolkit < handle
 				root = [];
 				return;
 			end
-			if (isa(jRoot, 'etherj.dicom.PatientRoot'))
+			if (isa(jRoot, 'icr.etherj.dicom.PatientRoot'))
 				root = ether.dicom.PatientRoot(jRoot);
 				return;
 			end
 			throw(MException('Ether:DICOM:Toolkit', ...
-				['Illegal argument type: ',class(jRoot),' etherj.dicom.PatientRoot required']));
+				['Illegal argument type: ',class(jRoot),' icr.etherj.dicom.PatientRoot required']));
 		end
 
 		%-------------------------------------------------------------------------
@@ -103,19 +103,19 @@ classdef Toolkit < handle
 				patient = [];
 				return;
 			end
-			if (isa(jPatient, 'etherj.dicom.Patient'))
+			if (isa(jPatient, 'icr.etherj.dicom.Patient'))
 				patient = ether.dicom.Patient(jPatient);
 				return;
 			end
 			throw(MException('Ether:DICOM:Toolkit', ...
-				['Illegal argument type: ',class(jPatient),' etherj.dicom.Patient required']));
+				['Illegal argument type: ',class(jPatient),' icr.etherj.dicom.Patient required']));
 		end
 
 		%-------------------------------------------------------------------------
 		function rtStruct = createRtStruct(this, arg)
 			jRtStruct = [];
 			if (isa(arg, 'ether.dicom.SopInstance') || ...
-				 isa(arg, 'etherj.dicom.SopInstance'))
+				 isa(arg, 'icr.etherj.dicom.SopInstance'))
 				jRtStruct = this.jToolkit.createRtStruct(arg.getDicomObject());
 			else
 				if (isa(arg, 'org.dcm4che2.data.DicomObject'))
@@ -134,12 +134,12 @@ classdef Toolkit < handle
 				series = [];
 				return;
 			end
-			if isa(jSeries, 'etherj.dicom.Series')
+			if isa(jSeries, 'icr.etherj.dicom.Series')
 				series = ether.dicom.Series(jSeries);
 				return;
 			end
 			throw(MException('Ether:DICOM:Toolkit', ...
-				['Illegal argument type: ',class(jSeries),' etherj.dicom.Series required']));
+				['Illegal argument type: ',class(jSeries),' icr.etherj.dicom.Series required']));
 		end
 
 		%-------------------------------------------------------------------------
@@ -165,12 +165,12 @@ classdef Toolkit < handle
 				study = [];
 				return;
 			end
-			if isa(jStudy, 'etherj.dicom.Study')
+			if isa(jStudy, 'icr.etherj.dicom.Study')
 				study = ether.dicom.Study(jStudy);
 				return;
 			end
 			throw(MException('Ether:DICOM:Toolkit', ...
-				['Illegal argument type: ',class(jStudy),' etherj.dicom.Study required']));
+				['Illegal argument type: ',class(jStudy),' icr.etherj.dicom.Study required']));
 		end
 
 		%-------------------------------------------------------------------------
@@ -188,7 +188,7 @@ classdef Toolkit < handle
 		%-------------------------------------------------------------------------
 		function this = Toolkit()
 			this.imageUidMap = [];
-			this.jToolkit = etherj.dicom.DicomToolkit.getToolkit();
+			this.jToolkit = icr.etherj.dicom.DicomToolkit.getToolkit();
 		end
 
 		%-------------------------------------------------------------------------

@@ -14,12 +14,14 @@ classdef RtStruct < handle
 		label = '';
 		name = '';
 		patientName = '';
+      patientId = '';
 		time = '';
+      uid = '';
+      jRtStruct = ''; % Don't really want to expose this but needs must for RtRoi.
 	end
 
 	%----------------------------------------------------------------------------
 	properties(Access=private)
-		jRtStruct = [];
 		roiList = [];
 	end
 
@@ -29,18 +31,39 @@ classdef RtStruct < handle
 		function this = RtStruct(jRtStruct)
 			import ether.dicom.Tag;
 			this.jRtStruct = jRtStruct;
-			this.date = char(jRtStruct.getStructureSetDate());
-			this.description = char(jRtStruct.getStructureSetDescription());
-			this.label = char(jRtStruct.getStructureSetLabel());
-			this.name = char(jRtStruct.getStructureSetName());
-			jDcm = jRtStruct.getDicomObject();
-			this.patientName = char(jDcm.getString(Tag.PatientName));
-			this.time = char(jRtStruct.getStructureSetTime());
-		end
-
+			this.date = char(jRtStruct.getStructureSetModule().getStructureSetDate());
+			this.description = char(jRtStruct.getStructureSetModule().getStructureSetDescription());
+			this.label = char(jRtStruct.getStructureSetModule().getStructureSetLabel());
+			this.name = char(jRtStruct.getStructureSetModule().getStructureSetName());
+			this.patientName = char(jRtStruct.getPatientModule().getPatientName());
+         this.patientId = char(jRtStruct.getPatientModule().getPatientId());
+			this.time = char(jRtStruct.getStructureSetModule().getStructureSetTime());
+         this.uid = char(jRtStruct.getSopInstanceUid());
+      end
+      
 		%-------------------------------------------------------------------------
+		function desc = getDescription(this)
+			desc = this.description;
+      end
+      
+      %-------------------------------------------------------------------------
+		function patientName = getPatientName(this)
+			patientName = this.patientName;
+      end
+      
+      %-------------------------------------------------------------------------
+		function uid = getSopInstanceUid(this)
+			uid = this.uid;
+      end
+      
+      %-------------------------------------------------------------------------
+		function patientId = getPatientId(this)
+			patientId = this.patientId;
+      end
+      
+      %-------------------------------------------------------------------------
 		function count = get.roiCount(this)
-			count = this.getRoiCount();
+			count = this.jRtStruct.getStructureSetModule().getStructureSetRoiList().size();
 		end
 
 		%-------------------------------------------------------------------------
@@ -95,9 +118,9 @@ classdef RtStruct < handle
 		%-------------------------------------------------------------------------
 		function roiList = createRoiList(this)
 			roiList = ether.collect.CellArrayList('ether.dicom.RtRoi');
-			jRoiList = this.jRtStruct.getRoiList();
-			for i=0:jRoiList.size()-1
-				roi = ether.dicom.RtRoi(jRoiList.get(i), this);
+			jSSRoiList = this.jRtStruct.getStructureSetModule().getStructureSetRoiList();
+			for i=0:jSSRoiList.size()-1
+				roi = ether.dicom.RtRoi(jSSRoiList.get(i), this);
 				roiList.add(roi);
 			end
 		end

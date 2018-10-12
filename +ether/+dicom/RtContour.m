@@ -50,7 +50,7 @@ classdef RtContour < handle
 
 		%-------------------------------------------------------------------------
 		function points = getContourPointsList(this)
-			jList = this.jRtContour.getContourPointsList();
+			jList = this.jRtContour.getContourData();
 			nPoints = jList.size();
 			points = zeros(nPoints, 3);
 			for i=0:nPoints-1;
@@ -62,9 +62,14 @@ classdef RtContour < handle
 		%-------------------------------------------------------------------------
 		function refList = getImageReferenceList(this)
 			refList = ether.collect.CellArrayList('ether.dicom.ImageReference');
-			jRefList = this.jRtContour.getImageReferenceList();
-			for i=0:jRefList.size()-1
-				ref = ether.dicom.ImageReference(jRefList.get(i));
+			jCiList = this.jRtContour.getContourImageList();
+			for i=0:jCiList.size()-1
+            jCi = jCiList.get(i);
+            jRef = javaObject('icr.etherj.dicom.ImageReference', ...
+               jCi.getReferencedSopClassUid(), jCi.getReferencedSopInstanceUid, ...
+               jCi.getReferencedFrameNumber());
+            
+				ref = ether.dicom.ImageReference(jRef);
 				refList.add(ref);
 			end
 		end

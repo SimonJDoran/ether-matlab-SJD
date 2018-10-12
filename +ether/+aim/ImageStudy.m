@@ -16,7 +16,7 @@ classdef ImageStudy < handle
 
 	methods
 		function this = ImageStudy(jStudy)
-			if (numel(jStudy) ~= 1) || ~isa(jStudy, 'etherj.aim.ImageStudy')
+			if (numel(jStudy) ~= 1) || ~isa(jStudy, 'icr.etherj.aim.ImageStudy')
 				return;
 			end
 			this.javaStudy = jStudy;

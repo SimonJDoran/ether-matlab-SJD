@@ -20,7 +20,7 @@ classdef (Abstract) TwoDimensionGeometricShape < ether.aim.GeometricShape
 		function this = TwoDimensionGeometricShape(j2dShape)
 			this.coords = containers.Map('KeyType', 'uint32', 'ValueType', 'any');
 			if ((numel(j2dShape) ~= 1) || ...
-				 ~isa(j2dShape, 'etherj.aim.TwoDimensionGeometricShape'))
+				 ~isa(j2dShape, 'icr.etherj.aim.TwoDimensionGeometricShape'))
 				return;
 			end
 			this.java2dShape = j2dShape;

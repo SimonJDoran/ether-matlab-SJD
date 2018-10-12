@@ -23,7 +23,7 @@ classdef ImageAnnotationCollection < ether.aim.AnnotationCollection
 		%-------------------------------------------------------------------------
 		function this = ImageAnnotationCollection(jIac)
 			this.annotations = containers.Map('KeyType', 'char', 'ValueType', 'any');
-			if ((numel(jIac) ~= 1) || ~isa(jIac, 'etherj.aim.ImageAnnotationCollection'))
+			if ((numel(jIac) ~= 1) || ~isa(jIac, 'icr.etherj.aim.ImageAnnotationCollection'))
 				return;
 			end
 			this.javaIac = jIac;

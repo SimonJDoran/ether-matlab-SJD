@@ -90,7 +90,7 @@ classdef JavaDicom < ether.dicom.DicomObject
 			error = true;
 			message = '';
 			try
-				value = etherj.dicom.DicomUtils.getSequenceItemCount(this.jDcm, ...
+				value = icr.etherj.dicom.DicomUtils.getSequenceItemCount(this.jDcm, ...
 					seqPath);
 				error = false;
 			catch ex
@@ -117,7 +117,7 @@ classdef JavaDicom < ether.dicom.DicomObject
 						if this.frameItemMap.isKey(frameIdx)
 							jDicom = this.frameItemMap(frameIdx);
 						else
-							jDicom = etherj.dicom.DicomUtils.getSequenceObject(...
+							jDicom = icr.etherj.dicom.DicomUtils.getSequenceObject(...
 								this.jDcm, seqPath(1:2));
 							if isempty(jDicom)
 								message = sprintf('No item in SQ %08x at index %i', ...
@@ -134,7 +134,7 @@ classdef JavaDicom < ether.dicom.DicomObject
 						finalPath = [seqPath,idx];
 				end
 				% Fetch the final item and value
-				jItemDcm = etherj.dicom.DicomUtils.getSequenceObject(jDicom, ...
+				jItemDcm = icr.etherj.dicom.DicomUtils.getSequenceObject(jDicom, ...
 					finalPath);
 				if isempty(jItemDcm)
 					message = 'No item found';
@@ -167,7 +167,7 @@ classdef JavaDicom < ether.dicom.DicomObject
 						if this.frameItemMap.isKey(frameIdx)
 							jDicom = this.frameItemMap(frameIdx);
 						else
-							jDicom = etherj.dicom.DicomUtils.getSequenceObject(...
+							jDicom = icr.etherj.dicom.DicomUtils.getSequenceObject(...
 								this.jDcm, seqPath(1:2));
 							if isempty(jDicom)
 								message = sprintf('No item in SQ %08x at index %i', ...
@@ -184,7 +184,7 @@ classdef JavaDicom < ether.dicom.DicomObject
 						finalPath = seqPath;
 				end
 				% Fetch the final item and value
-				jItemDcm = etherj.dicom.DicomUtils.getSequenceObject(jDicom, ...
+				jItemDcm = icr.etherj.dicom.DicomUtils.getSequenceObject(jDicom, ...
 					finalPath);
 				if isempty(jItemDcm)
 					message = 'No item found';
@@ -342,7 +342,7 @@ classdef JavaDicom < ether.dicom.DicomObject
 			vr = '';
 			message = '';
 			try
-				vr = char(etherj.dicom.DicomUtils.getVr(jDicom, tag));
+				vr = char(icr.etherj.dicom.DicomUtils.getVr(jDicom, tag));
 				error = isempty(vr);
 			catch ex
 				error = true;

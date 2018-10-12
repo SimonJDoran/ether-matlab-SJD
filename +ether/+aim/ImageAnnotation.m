@@ -19,7 +19,7 @@ classdef ImageAnnotation < ether.aim.Annotation
 		function this = ImageAnnotation(jIa)
 			this.markups = containers.Map('KeyType', 'char', 'ValueType', 'any');
 			this.references = containers.Map('KeyType', 'char', 'ValueType', 'any');
-			if (numel(jIa) ~= 1) || ~isa(jIa, 'etherj.aim.ImageAnnotation')
+			if (numel(jIa) ~= 1) || ~isa(jIa, 'icr.etherj.aim.ImageAnnotation')
 				return;
 			end
 			this.javaIa = jIa;
@@ -30,9 +30,9 @@ classdef ImageAnnotation < ether.aim.Annotation
 			jMarkups = jIa.getMarkupList();
 			for j=0:jMarkups.size()-1
 				jMarkup = jMarkups.get(j);
-				if isa(jMarkup, 'etherj.aim.TwoDimensionPolyline')
+				if isa(jMarkup, 'icr.etherj.aim.TwoDimensionPolyline')
 					markup = ether.aim.TwoDimensionPolyline(jMarkup);
-				elseif isa(jMarkup, 'etherj.aim.TwoDimensionCircle')
+				elseif isa(jMarkup, 'icr.etherj.aim.TwoDimensionCircle')
 					markup = ether.aim.TwoDimensionCircle(jMarkup);
 				else
 					continue;
@@ -42,7 +42,7 @@ classdef ImageAnnotation < ether.aim.Annotation
 			jRefs = jIa.getReferenceList();
 			for j=0:jRefs.size()-1
 				jRef = jRefs.get(j);
-				if ~isa(jRef, 'etherj.aim.DicomImageReference')
+				if ~isa(jRef, 'icr.etherj.aim.DicomImageReference')
 					continue;
 				end
 				ref = ether.aim.DicomImageReference(jRef);

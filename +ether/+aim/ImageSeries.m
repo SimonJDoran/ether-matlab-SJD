@@ -18,7 +18,7 @@ classdef ImageSeries < handle
 		%-------------------------------------------------------------------------
 		function this = ImageSeries(jSeries)
 			this.images = containers.Map('KeyType', 'char', 'ValueType', 'any');
-			if (numel(jSeries) ~= 1) || ~isa(jSeries, 'etherj.aim.ImageSeries')
+			if (numel(jSeries) ~= 1) || ~isa(jSeries, 'icr.etherj.aim.ImageSeries')
 				return;
 			end
 			this.javaSeries = jSeries;

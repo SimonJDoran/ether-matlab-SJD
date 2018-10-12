@@ -16,7 +16,7 @@ classdef Person < handle
 	
 	methods
 		function this = Person(jPerson)
-			if (numel(jPerson) ~= 1) || ~isa(jPerson, 'etherj.aim.Person')
+			if (numel(jPerson) ~= 1) || ~isa(jPerson, 'icr.etherj.aim.Person')
 				return;
 			end
 			this.javaPerson = jPerson;
